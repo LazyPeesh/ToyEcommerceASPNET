@@ -1,34 +1,56 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using ToyEcommerceASPNET.Models;
+using ToyEcommerceASPNET.Models.interfaces;
+using ToyEcommerceASPNET.Services.interfaces;
 
-namespace ToyEcommerceASPNET.Services
+
+namespace ToyEcommerceASPNET.Services;
+
+public class ProductService : IProductService
 {
-    public class ProductService : IProductService
+    private readonly IMongoCollection<Product> _products;
+
+    public ProductService(
+        IOptions<ProductDatabaseSettings> bookStoreDatabaseSettings)
     {
-        private readonly IMongoCollection<Product> _productCollection;
-        private readonly IOptions<DatabaseSettings> _dbSettings;
+        var mongoClient = new MongoClient(
+            bookStoreDatabaseSettings.Value.ConnectionString);
 
-        public ProductService(IOptions<DatabaseSettings> dbSettings)
-        {
-            this._dbSettings = dbSettings;
-            var mongoClient = new MongoClient(dbSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(dbSettings.Value.DatabaseName);
-            _productCollection = mongoDatabase.GetCollection<Product>
-                (dbSettings.Value.ProductsCollectionName);
-        }
-        public async Task<IEnumerable<Product>> GetAllAsync() =>
-            await _productCollection.Find(c => true).ToListAsync();
-        public async Task<Product> GetById(string id) =>
-            await _productCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
+        var mongoDatabase = mongoClient.GetDatabase(
+            bookStoreDatabaseSettings.Value.DatabaseName);
 
-        public async Task CreateAsync(Product Product) =>
-            await _productCollection.InsertOneAsync(Product);
+        _products = mongoDatabase.GetCollection<Product>(
+            bookStoreDatabaseSettings.Value.CollectionName);
+    }
 
-        public async Task UpdateAsync(string id, Product Product) =>
-            await _productCollection.ReplaceOneAsync(c => c.Id == id, Product);
+    public ActionResult<List<Product>> GetAllAsync()
+    {
+        return _products.Find(product => true).ToList();
+    }
 
-        public async Task DeleteAsync(string id) =>
-            await _productCollection.DeleteOneAsync(a => a.Id == id);
+    public Task<Product> GetById(string id)
+    {
+        return Task.FromResult(_products.Find(product => product.Id == id).FirstOrDefault());
+    }
+
+
+    public Task CreateAsync(Product product)
+    {
+        _products.InsertOne(product);
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAsync(string id, Product product)
+    {
+        _products.ReplaceOne(product => product.Id == id, product);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(string id)
+    {
+        _products.DeleteOne(product => product.Id == id);
+        return Task.CompletedTask;
     }
 }

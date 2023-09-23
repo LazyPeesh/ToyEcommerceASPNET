@@ -6,65 +6,47 @@ using ToyEcommerceASPNET.Services;
 
 namespace ToyEcommerceASPNET.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/products")]
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly IProductService _productService;
-        public ProductController(IProductService productService)
+        private readonly ProductService _productService;
+
+        public ProductController(ProductService productService)
         {
             _productService = productService;
         }
+
         // GET: api/<ProductController>
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public ActionResult<List<Product>> Get()
         {
-            var product = await _productService.GetAllAsync();
-            return Ok(product);
+            return _productService.GetAllAsync();
         }
 
         // GET api/<ProductController>/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        public string Get(int id)
         {
-            var product = await _productService.GetById(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return Ok(product);
+            return "value";
         }
 
         // POST api/<ProductController>
         [HttpPost]
-        public async Task<IActionResult> Post(Product product)
+        public void Post([FromBody] string value)
         {
-            await _productService.CreateAsync(product);
-            return Ok("Created successfully");
         }
 
         // PUT api/<ProductController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] Product updatedProduct)
+        public void Put(int id, [FromBody] string value)
         {
-            var product = await _productService.GetById(id);
-            if (product == null)
-                return NotFound();
-
-            await _productService.UpdateAsync(id, updatedProduct);
-            return Ok("Updated successfully");
         }
 
         // DELETE api/<ProductController>/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public void Delete(int id)
         {
-            var product = await _productService.GetById(id);
-            if (product == null)
-                return NotFound();
-
-            await _productService.DeleteAsync(id);
-            return Ok("Delete successfully");
         }
     }
 }

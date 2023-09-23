@@ -6,7 +6,7 @@ namespace ToyEcommerceASPNET.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class AuthenticationController : ControllerBase
+	public class AuthenticationController : Controller
 	{
 		// GET: api/<AuthenticationController>
 		[HttpGet]

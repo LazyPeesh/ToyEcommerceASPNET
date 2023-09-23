@@ -1,10 +1,11 @@
-﻿using ToyEcommerceASPNET.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using ToyEcommerceASPNET.Models;
 
-namespace ToyEcommerceASPNET.Services
+namespace ToyEcommerceASPNET.Services.interfaces
 {
     public interface IProductService
     {
-        Task<IEnumerable<Product>> GetAllAsync();
+        ActionResult<List<Product>> GetAllAsync();
         Task<Product> GetById(string id);
         Task CreateAsync(Product product);
         Task UpdateAsync(string id, Product product);
