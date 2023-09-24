@@ -32,7 +32,15 @@ public class ProductService : IProductService
 	{
 		return _products.Find(product => product.Id == id).FirstOrDefault();
 	}
+	public List<Product> GetByCategory(string category)
+	{
+		return _products.Find(product => product.Category == category).ToList();
+	}
 
+	public List<Product> Search(string keyword)
+	{
+		return _products.Find(product => product.Name.Contains(keyword)).ToList();
+	}
 
 	public Product Create(Product product)
 	{

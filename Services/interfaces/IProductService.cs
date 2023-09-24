@@ -8,7 +8,9 @@ namespace ToyEcommerceASPNET.Services.interfaces
         List<Product> GetAll();
         Product GetById(string id);
 		Product Create(Product product);
-        void Update(string id, Product product);
+        List<Product> Search(string keyword);
+        List<Product> GetByCategory(string category);
+		void Update(string id, Product product);
         void Remove(string id);
     }
 }
