@@ -22,7 +22,7 @@ namespace ToyEcommerceASPNET.Controllers
         [HttpGet]
         public ActionResult<List<Product>> Get()
         {
-            return _productService.GetAllAsync();
+            return _productService.GetAll();
         }
 
         // GET api/<ProductController>/5
@@ -41,7 +41,7 @@ namespace ToyEcommerceASPNET.Controllers
         [HttpPost]
         public ActionResult<Product> Post([FromBody] Product product)
         {
-            _productService.CreateAsync(product);
+            _productService.Create(product);
 
             return CreatedAtAction(nameof(Get), new {id =  product.Id}, product);
         }
@@ -55,7 +55,7 @@ namespace ToyEcommerceASPNET.Controllers
 			if (existingProduct == null)
 				return NotFound($"Product with Id = {id} not found");
 
-            _productService.UpdateAsync(id, product);
+            _productService.Update(id, product);
 			return NoContent();
 		}
 
@@ -68,7 +68,7 @@ namespace ToyEcommerceASPNET.Controllers
 			if (existingProduct == null)
 				return NotFound($"Product with Id = {id} not found");
 
-            _productService.DeleteAsync(id);
+            _productService.Remove(id);
 			return Ok($"Product with Id = {id} deleted");
 		}
     }
