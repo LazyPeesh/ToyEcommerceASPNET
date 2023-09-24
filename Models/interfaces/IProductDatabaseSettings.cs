@@ -1,8 +1,11 @@
 namespace ToyEcommerceASPNET.Models.interfaces;
 
-public interface IProductDatabaseSettings
+public interface IDatabaseSettings
 {
-    string CollectionName { get; set; }
     string ConnectionString { get; set; }
     string DatabaseName { get; set; }
+    string ProductCollectionName { get; set; }
+    string UserCollectionName { get; set; }
+
+
 }
