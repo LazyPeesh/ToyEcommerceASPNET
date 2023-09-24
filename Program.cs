@@ -6,62 +6,55 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.Configure<ProductDatabaseSettings>(
-                builder.Configuration.GetSection(nameof(ProductDatabaseSettings)));
+			// Add services to the container.
+			builder.Services.Configure<DatabaseSettings>(
+				builder.Configuration.GetSection(nameof(DatabaseSettings)));
 
-            builder.Services.AddSingleton<IProductDatabaseSettings>(sp =>
-                sp.GetRequiredService<IOptions<ProductDatabaseSettings>>().Value);
+			
+			builder.Services.AddTransient<IProductService, ProductService>();
 
-            builder.Services.AddSingleton<IMongoClient>(s =>
-                new MongoClient(
-                    builder.Configuration.GetValue<string>("ProductDatabaseSettings:ConnectionString")));
+			builder.Services.AddMvc();
+			builder.Services.AddControllers();
+			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+			builder.Services.AddEndpointsApiExplorer();
 
-            builder.Services.AddScoped<IProductService, ProductService>();
-            builder.Services.AddSingleton<ProductService>();
+			// Create swagger document for APIs
+			builder.Services.AddSwaggerGen(c =>
+			{
+				c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+				{
+					Title = "EcommerceAPI",
+					Version = "v1"
+				});
+			});
 
-            builder.Services.AddMvc();
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
+			var app = builder.Build();
 
-            // Create swagger document for APIs
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-                {
-                    Title = "EcommerceAPI",
-                    Version = "v1"
-                });
-            });
+			// Configure the HTTP request pipeline.
+			if (app.Environment.IsDevelopment())
+			{
+				app.UseSwagger();
+				app.UseSwaggerUI();
+			}
 
-            var app = builder.Build();
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+			app.UseRouting();
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+			app.UseAuthorization();
 
-            app.UseRouting();
+			app.MapControllerRoute(
+				name: "default",
+				pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            app.UseAuthorization();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            app.Run();
-        }
-    }
+			app.Run();
+		}
+	}
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services;
+using ToyEcommerceASPNET.Services.interfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,9 +11,9 @@ namespace ToyEcommerceASPNET.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ProductService _productService;
+        private readonly IProductService _productService;
 
-        public ProductController(ProductService productService)
+        public ProductController(IProductService productService)
         {
             _productService = productService;
         }
@@ -26,27 +27,49 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET api/<ProductController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public ActionResult<Product> Get(string id)
         {
-            return "value";
+            var product = _productService.GetById(id);
+
+            if (product == null)
+                return NotFound($"Product with Id = {id} not found");
+
+            return product;
         }
 
         // POST api/<ProductController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public ActionResult<Product> Post([FromBody] Product product)
         {
+            _productService.CreateAsync(product);
+
+            return CreatedAtAction(nameof(Get), new {id =  product.Id}, product);
         }
 
         // PUT api/<ProductController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public ActionResult Put(string id, [FromBody] Product product)
         {
-        }
+			var existingProduct = _productService.GetById(id);
+
+			if (existingProduct == null)
+				return NotFound($"Product with Id = {id} not found");
+
+            _productService.UpdateAsync(id, product);
+			return NoContent();
+		}
 
         // DELETE api/<ProductController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public ActionResult Delete(string id)
         {
-        }
+			var existingProduct = _productService.GetById(id);
+
+			if (existingProduct == null)
+				return NotFound($"Product with Id = {id} not found");
+
+            _productService.DeleteAsync(id);
+			return Ok($"Product with Id = {id} deleted");
+		}
     }
 }

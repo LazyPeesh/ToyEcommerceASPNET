@@ -10,47 +10,43 @@ namespace ToyEcommerceASPNET.Services;
 
 public class ProductService : IProductService
 {
-    private readonly IMongoCollection<Product> _products;
+	private readonly IMongoCollection<Product> _products;
 
-    public ProductService(
-        IOptions<ProductDatabaseSettings> bookStoreDatabaseSettings)
-    {
-        var mongoClient = new MongoClient(
-            bookStoreDatabaseSettings.Value.ConnectionString);
+	public ProductService(IOptions<DatabaseSettings> databaseSettings)
+	{
+		var mongoClient = new MongoClient(databaseSettings.Value.ConnectionString);
 
-        var mongoDatabase = mongoClient.GetDatabase(
-            bookStoreDatabaseSettings.Value.DatabaseName);
+		var mongoDatabase = mongoClient.GetDatabase(
+			databaseSettings.Value.DatabaseName);
 
-        _products = mongoDatabase.GetCollection<Product>(
-            bookStoreDatabaseSettings.Value.CollectionName);
-    }
+		_products = mongoDatabase.GetCollection<Product>(
+			databaseSettings.Value.ProductCollectionName);
+	}
 
-    public ActionResult<List<Product>> GetAllAsync()
-    {
-        return _products.Find(product => true).ToList();
-    }
+	public List<Product> GetAllAsync()
+	{
+		return _products.Find(product => true).ToList();
+	}
 
-    public Task<Product> GetById(string id)
-    {
-        return Task.FromResult(_products.Find(product => product.Id == id).FirstOrDefault());
-    }
+	public Product GetById(string id)
+	{
+		return _products.Find(product => product.Id == id).FirstOrDefault();
+	}
 
 
-    public Task CreateAsync(Product product)
-    {
-        _products.InsertOne(product);
-        return Task.CompletedTask;
-    }
+	public Product CreateAsync(Product product)
+	{
+		_products.InsertOne(product);
+		return product;
+	}
 
-    public Task UpdateAsync(string id, Product product)
-    {
-        _products.ReplaceOne(product => product.Id == id, product);
-        return Task.CompletedTask;
-    }
+	public void UpdateAsync(string id, Product product)
+	{
+		_products.ReplaceOne(product => product.Id == id, product);
+	}
 
-    public Task DeleteAsync(string id)
-    {
-        _products.DeleteOne(product => product.Id == id);
-        return Task.CompletedTask;
-    }
+	public void DeleteAsync(string id)
+	{
+		_products.DeleteOne(product => product.Id == id);
+	}
 }
