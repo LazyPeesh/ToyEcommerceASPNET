@@ -18,15 +18,15 @@ namespace ToyEcommerceASPNET.Controllers
             _productService = productService;
         }
 
-        // GET: api/<ProductController>
-        [HttpGet]
+		// GET: api/v1/products
+		[HttpGet]
         public ActionResult<List<Product>> Get()
         {
-            return _productService.GetAllAsync();
+            return _productService.GetAll();
         }
 
-        // GET api/<ProductController>/5
-        [HttpGet("{id}")]
+		// GET api/v1/products/{id}
+		[HttpGet("{id}")]
         public ActionResult<Product> Get(string id)
         {
             var product = _productService.GetById(id);
@@ -37,17 +37,41 @@ namespace ToyEcommerceASPNET.Controllers
             return product;
         }
 
-        // POST api/<ProductController>
-        [HttpPost]
+		// GET api/v1/products/keyword/{keyword}
+		[HttpGet("keyword/{keyword}")]
+		public ActionResult<List<Product>> Search(string keyword)
+		{
+			var product = _productService.Search(keyword);
+
+			if (product == null)
+				return NotFound($"Product with keywork = {keyword} not found");
+
+			return product;
+		}
+
+		// GET api/v1/products/category/{category}
+		[HttpGet("category/{category}")]
+		public ActionResult<List<Product>> GetByCategory(string category)
+		{
+			var product = _productService.GetByCategory(category);
+
+			if (product == null)
+				return NotFound($"Product with category = {category} not found");
+
+			return product;
+		}
+
+		// POST api/v1/products
+		[HttpPost]
         public ActionResult<Product> Post([FromBody] Product product)
         {
-            _productService.CreateAsync(product);
+            _productService.Create(product);
 
             return CreatedAtAction(nameof(Get), new {id =  product.Id}, product);
         }
 
-        // PUT api/<ProductController>/5
-        [HttpPut("{id}")]
+		// PUT api/v1/products/{id}
+		[HttpPut("{id}")]
         public ActionResult Put(string id, [FromBody] Product product)
         {
 			var existingProduct = _productService.GetById(id);
@@ -55,12 +79,12 @@ namespace ToyEcommerceASPNET.Controllers
 			if (existingProduct == null)
 				return NotFound($"Product with Id = {id} not found");
 
-            _productService.UpdateAsync(id, product);
+            _productService.Update(id, product);
 			return NoContent();
 		}
 
-        // DELETE api/<ProductController>/5
-        [HttpDelete("{id}")]
+		// DELETE api/v1/products/{id}
+		[HttpDelete("{id}")]
         public ActionResult Delete(string id)
         {
 			var existingProduct = _productService.GetById(id);
@@ -68,7 +92,7 @@ namespace ToyEcommerceASPNET.Controllers
 			if (existingProduct == null)
 				return NotFound($"Product with Id = {id} not found");
 
-            _productService.DeleteAsync(id);
+            _productService.Remove(id);
 			return Ok($"Product with Id = {id} deleted");
 		}
     }

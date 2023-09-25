@@ -18,6 +18,7 @@ namespace ToyEcommerceASPNET
 
 			
 			builder.Services.AddTransient<IProductService, ProductService>();
+			builder.Services.AddTransient<IUserService, UserService>();
 
 			builder.Services.AddMvc();
 			builder.Services.AddControllers();

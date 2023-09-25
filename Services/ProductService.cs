@@ -23,7 +23,7 @@ public class ProductService : IProductService
 			databaseSettings.Value.ProductCollectionName);
 	}
 
-	public List<Product> GetAllAsync()
+	public List<Product> GetAll()
 	{
 		return _products.Find(product => true).ToList();
 	}
@@ -32,20 +32,28 @@ public class ProductService : IProductService
 	{
 		return _products.Find(product => product.Id == id).FirstOrDefault();
 	}
+	public List<Product> GetByCategory(string category)
+	{
+		return _products.Find(product => product.Category == category).ToList();
+	}
 
+	public List<Product> Search(string keyword)
+	{
+		return _products.Find(product => product.Name.Contains(keyword)).ToList();
+	}
 
-	public Product CreateAsync(Product product)
+	public Product Create(Product product)
 	{
 		_products.InsertOne(product);
 		return product;
 	}
 
-	public void UpdateAsync(string id, Product product)
+	public void Update(string id, Product product)
 	{
 		_products.ReplaceOne(product => product.Id == id, product);
 	}
 
-	public void DeleteAsync(string id)
+	public void Remove(string id)
 	{
 		_products.DeleteOne(product => product.Id == id);
 	}
