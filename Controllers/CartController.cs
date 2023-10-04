@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
 
@@ -73,21 +74,90 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// GET api/<CartController>/5
 		[HttpGet("{id}")]
-		public string Get(int id)
+		public async Task<IActionResult> GetCartByUSerId(string id)
 		{
-			return "value";
+			try
+			{
+				var cart =  _cartService.GetCartByUserId(id);
+				if (cart == null)
+				{
+					return new NotFoundObjectResult(new
+					{
+						status = "error",
+						message = "Cart not found"
+					});
+				}
+
+				return new OkObjectResult(new
+				{
+					status = "success", 
+					cart = cart
+				});
+			}catch(Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
 		}
 
 		// POST api/<CartController>
 		[HttpPost]
-		public void Post([FromBody] string value)
+		public async Task<IActionResult> CreateCart([FromBody] Cart cart)
 		{
+			try
+			{
+			/*	 var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+				cart.UserId = userId;*/
+
+					_cartService.CreateCart(cart);
+
+				return new OkObjectResult(new
+				{
+						status = "success",
+						cart = cart
+					});
+
+			}
+			catch (Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
+
 		}
 
 		// PUT api/<CartController>/5
 		[HttpPut("{id}")]
-		public void Put(int id, [FromBody] string value)
+		public async Task<IActionResult> Put(int id, [FromBody] string productId, int quantity)
 		{
+			try
+			{
+				var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+
+				return new OkObjectResult(new
+				{
+					status = "success",
+					message = "Cart updated successfully"
+				});
+
+			}catch(Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
+
 		}
 
 		// DELETE api/<CartController>/5

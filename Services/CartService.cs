@@ -22,8 +22,9 @@ namespace ToyEcommerceASPNET.Services
 				databaseSettings.Value.CartCollectionName);
 		}
 
-		public List<Cart> GetAllCarts() {
-			return 	_cart.Find(cart => true).ToList();
+		public List<Cart> GetAllCarts()
+		{
+			return _cart.Find(cart => true).ToList();
 
 		}
 
@@ -43,5 +44,19 @@ namespace ToyEcommerceASPNET.Services
 			return await _cart.CountDocumentsAsync(user => true);
 		}
 
+
+		public Cart GetCartByUserId(string id)
+		{
+			return _cart.Find(cart => cart.UserId == id).FirstOrDefault();
+		}
+
+
+		public Cart CreateCart(Cart cart)
+		{
+			_cart.InsertOne(cart);
+			return cart;
+		}
+
+	
 	}
 }
