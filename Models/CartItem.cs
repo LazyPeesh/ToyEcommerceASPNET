@@ -9,6 +9,7 @@ namespace ToyEcommerceASPNET.Models
 		[BsonRepresentation(BsonType.ObjectId)]
 		public string Id { get; set; }
 
+		[BsonId]
 		[BsonRepresentation(BsonType.ObjectId)]
 		public string ProductId { get; set; }
 
