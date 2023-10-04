@@ -33,7 +33,7 @@ public class ProductService : IProductService
 
 		var data = new
 		{
-			data = products.Skip((page - 1) * perPage).Take(perPage),
+			product = products.Skip((page - 1) * perPage).Take(perPage),
 			total,
 			page,
 			last_page = Math.Ceiling((double)total / perPage)
@@ -71,7 +71,7 @@ public class ProductService : IProductService
 
 		return new
 		{
-			data = find.Skip((page - 1) * perPage).Take(perPage).ToList(),
+			product = find.Skip((page - 1) * perPage).Take(perPage).ToList(),
 			total,
 			page,
 			last_page = Math.Ceiling((double)total / perPage)

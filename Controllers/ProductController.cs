@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Amazon.Runtime.Internal;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using System.IO;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -15,10 +17,12 @@ namespace ToyEcommerceASPNET.Controllers
 	public class ProductController : ControllerBase
 	{
 		private readonly IProductService _productService;
+		private readonly IWebHostEnvironment _environment;
 
-		public ProductController(IProductService productService)
+		public ProductController(IProductService productService, IWebHostEnvironment environment)
 		{
 			_productService = productService;
+			_environment = environment;
 		}
 
 		// GET: api/v1/products
@@ -65,7 +69,7 @@ namespace ToyEcommerceASPNET.Controllers
 			if (products.Count() == 0)
 				return NotFound($"Product with category = {category} not found");
 
-			return Ok(products); 
+			return Ok(products);
 		}
 
 		// POST api/v1/products
@@ -83,10 +87,9 @@ namespace ToyEcommerceASPNET.Controllers
 
 			if (p.Images != null)
 			{
-				List<string> images = PostFilesPath(p.Images);
+				List<string> images = await PostFilesPath(p.Images);
 				product.Images = images;
 			}
-
 
 			await _productService.CreateAsync(product);
 			return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
@@ -95,12 +98,56 @@ namespace ToyEcommerceASPNET.Controllers
 		// PUT api/v1/products/{id}
 		[HttpPut("{id}")]
 
-		public async Task<IActionResult> Put(string id, [FromBody] Product product)
+		public async Task<IActionResult> Put(string id, [FromForm] ProductImage p)
 		{
-			var existingProduct = _productService.GetById(id);
+			var existingProduct = await _productService.GetById(id);
 
 			if (existingProduct == null)
 				return NotFound($"Product with Id = {id} not found");
+
+			var product = new Product
+			{
+				Id = id,
+				Name = p.Name,
+				Price = p.Price,
+				Description = p.Description,
+				Ratings = p.Ratings,
+				Category = p.Category
+			};
+
+			if (p.Images != null && p.Images.Count() > 0)
+			{
+				List<string> uploadImages = await PostFilesPath(p.Images);
+
+				var imagesToDelete = new List<string>();
+				if (p.KeptImages.Count() != 0)
+				{
+					imagesToDelete = existingProduct.Images.Where(image => !p.KeptImages.Contains(image)).ToList();
+				}
+				else
+				{
+					imagesToDelete = existingProduct.Images;
+				}
+				RemoveImage(imagesToDelete);
+
+				product.Images = p.KeptImages;
+				if (product.Images.Count() != 0)
+				{
+					foreach (var image in uploadImages)
+						if (!product.Images.Contains(image))
+							product.Images.Add(image);
+				}
+				else
+				{
+					product.Images = uploadImages;
+				}
+			}
+			else
+			{
+				var imagesToDelete = existingProduct.Images.Where(image => !p.KeptImages.Contains(image)).ToList();
+				RemoveImage(imagesToDelete);
+				product.Images = p.KeptImages;
+			}
 
 			await _productService.UpdateAsync(id, product);
 			return Ok(product);
@@ -119,29 +166,65 @@ namespace ToyEcommerceASPNET.Controllers
 			return Ok($"Product with Id = {id} deleted");
 		}
 
-		private List<string> PostFilesPath(IFormFile[] fileImages)
+		private async Task<List<string>> PostFilesPath(IFormFile[] fileImages)
 		{
 			List<string> images = new List<string>();
 			foreach (var file in fileImages)
 			{
-				var path = Path.Combine(Directory.GetCurrentDirectory(),
-					"wwwroot", "productImages", file.FileName);
+				string filePath = GetFilePath();
+
+				if (!System.IO.Directory.Exists(filePath))
+				{
+					System.IO.Directory.CreateDirectory(filePath);
+				}
+
+				string path = filePath + file.FileName;
+
 				using (var stream = System.IO.File.Create(path))
 				{
-					file.CopyToAsync(stream);
+					await file.CopyToAsync(stream);
 				}
-				string imagePath = "/productImages/" + file.FileName;
+				string imagePath = "\\productImages\\" + file.FileName;
 				images.Add(imagePath);
 			}
 			return images;
 		}
 
+		private IActionResult RemoveImage(List<string> imagePaths)
+		{
+			try
+			{
+				foreach (var imagePath in imagePaths)
+				{
+					string path = this._environment.WebRootPath + imagePath;
+
+					if (System.IO.File.Exists(path))
+					{
+						System.IO.File.Delete(path);
+					}
+				}
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+				throw ex;
+			}
+		}
+
 		[HttpPost]
 		[Route("uploadFiles")]
-		public Task<IActionResult> PostFilesAsync(IFormFile[] fileImages)
+		public async Task<IActionResult> PostFilesAsync(IFormFile[] fileImages)
 		{
-			List<string> images = PostFilesPath(fileImages);
-			return Task.FromResult<IActionResult>(Ok(images));
+			List<string> images = await PostFilesPath(fileImages);
+			return Ok(images);
+		}
+
+
+
+		[NonAction]
+		private string GetFilePath()
+		{
+			return this._environment.WebRootPath + "\\productImages\\";
 		}
 
 	}

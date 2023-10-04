@@ -17,9 +17,5 @@
     <Compile Remove="Models\Review.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\productImages\" />
-  </ItemGroup>
-
 
 </Project>
