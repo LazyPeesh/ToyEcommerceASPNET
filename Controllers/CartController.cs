@@ -236,8 +236,35 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// DELETE api/<CartController>/5
 		[HttpDelete("{id}")]
-		public void Delete(int id)
+		public async Task<IActionResult> DeleteCart([FromRoute] string id)
 		{
+			try
+			{
+				var cart = _cartService.GetCartByUserId(id);
+				if (cart == null)
+				{
+					return new NotFoundObjectResult(new
+					{
+						status = "error",
+						message = "Cart not found"
+					});
+				}
+				_cartService.DeleteCart(id);
+				return new OkObjectResult(new
+				{
+					status = "success",
+					message = "Cart was deleted",
+					cart = cart
+				});
+			}
+			catch (Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
 		}
 	}
 }
