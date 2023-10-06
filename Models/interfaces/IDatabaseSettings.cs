@@ -6,6 +6,7 @@ public interface IDatabaseSettings
     string DatabaseName { get; set; }
     string ProductCollectionName { get; set; }
     string UserCollectionName { get; set; }
+    string OrderCollectionName { get; set; }
 
 
 }
