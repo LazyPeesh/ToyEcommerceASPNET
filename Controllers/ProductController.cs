@@ -36,7 +36,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// GET api/v1/products/{id}
 		[HttpGet("{id}")]
-		public async Task<IActionResult> Get(string id)
+		public async Task<IActionResult> Get([FromRoute] string id)
 		{
 			var product = await _productService.GetById(id);
 
@@ -100,7 +100,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// PUT api/v1/products/{id}
 		[HttpPut("{id}")]
-		public async Task<IActionResult> Put(string id, [FromForm] ProductImage p)
+		public async Task<IActionResult> Put([FromRoute] string id, [FromForm] ProductImage p)
 		{
 			var existingProduct = await _productService.GetById(id);
 
@@ -123,7 +123,7 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				// Upload new images to file and return list of image paths
 				List<string> uploadImages = await UploadImages(p.Images, id);
-				
+
 				var imagesToDelete = new List<string>();
 				// Filter images that need to be remove
 				if (p.KeptImages.Count() != 0)
@@ -163,7 +163,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// DELETE api/v1/products/{id}
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> Delete(string id)
+		public async Task<IActionResult> Delete([FromRoute] string id)
 		{
 			var existingProduct = await _productService.GetById(id);
 

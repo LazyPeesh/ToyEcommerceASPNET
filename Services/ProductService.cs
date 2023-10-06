@@ -28,7 +28,7 @@ public class ProductService : IProductService
 		var products = await _products.Find(product => true).ToListAsync();
 
 		int page = queryPage.GetValueOrDefault(1) <= 0 ? 1 : queryPage.GetValueOrDefault(1);
-		int perPage = 2;    // number of items per page
+		int perPage = 3;    // number of items per page
 		var total = products.Count();
 
 		var data = new

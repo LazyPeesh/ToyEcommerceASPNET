@@ -1,5 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using ToyEcommerceASPNET.Data;
 using ToyEcommerceASPNET.Models.interfaces;
 using ToyEcommerceASPNET.Services;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -16,9 +18,10 @@ namespace ToyEcommerceASPNET
 			builder.Services.Configure<DatabaseSettings>(
 				builder.Configuration.GetSection(nameof(DatabaseSettings)));
 
-			
 			builder.Services.AddTransient<IProductService, ProductService>();
 			builder.Services.AddTransient<IUserService, UserService>();
+			builder.Services.AddTransient<ITransactionService, TransactionService>();
+
 
 			builder.Services.AddMvc();
 			builder.Services.AddControllers();
@@ -34,6 +37,11 @@ namespace ToyEcommerceASPNET
 					Version = "v1"
 				});
 			});
+
+			// Dependency Injection of DbContext Class
+			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+			builder.Services.AddDbContext<ApplicationDbContext>(options =>
+			options.UseSqlServer(connectionString));
 
 			var app = builder.Build();
 
