@@ -8,4 +8,6 @@ public class DatabaseSettings : IDatabaseSettings
     public string UserCollectionName { get; set; } = string.Empty;
     public string CartCollectionName { get; set; } = string.Empty;
 
+    public string OrderCollectionName { get; set; } = string.Empty;
+
 }

@@ -21,6 +21,8 @@ namespace ToyEcommerceASPNET
 			builder.Services.AddTransient<IUserService, UserService>();
 			builder.Services.AddTransient<ICartService, CartService>();
 
+			builder.Services.AddTransient<IOrderService, OrderService>();
+
 			builder.Services.AddMvc();
 			builder.Services.AddControllers();
 			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
