@@ -7,4 +7,6 @@ public class DatabaseSettings : IDatabaseSettings
     public string ProductCollectionName { get; set; } = string.Empty;
     public string UserCollectionName { get; set; } = string.Empty;
 
+    public string OrderCollectionName { get; set; } = string.Empty;
+
 }
