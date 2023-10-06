@@ -9,6 +9,7 @@ namespace ToyEcommerceASPNET.Services.interfaces
 		Order GetOrderByUserId(string id);
 		Task<long> CountOrdersAsync();
 		Order CreateOrder(Order order);
+		Order GetOrderById(string id);
 		void UpdateOrder(string id, Order order);
 		void DeleteOrder(string id);
 	}

@@ -115,7 +115,8 @@ namespace ToyEcommerceASPNET.Controllers
 				var cartCreate = new Cart
 				{
 					UserId = cart.UserId,
-					Products = cart.Products,
+					Products = new List<CartItem> { }
+					
 /*					TotalPrice = cart.TotalPrice
 */				};
 

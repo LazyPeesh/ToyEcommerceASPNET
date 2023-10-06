@@ -19,14 +19,20 @@ namespace ToyEcommerceASPNET.Models
 			get
 			{
 				decimal totalPrice = 0;
-				foreach (var cartItem in Products)
+				if (Products != null)
 				{
-					// Use the null-conditional operator to safely access Price and provide a default value of 0 if it's null
-					decimal productPrice = cartItem.Product?.Price ?? 0;
+					foreach (var cartItem in Products)
+					{
+						decimal productPrice = cartItem.Product?.Price ?? 0;
 
-					totalPrice += (decimal)(productPrice * cartItem.Quantity);
+						totalPrice += (decimal)(productPrice * cartItem.Quantity);
+					}
+					return totalPrice;
 				}
-				return totalPrice;
+				else
+				{
+					return totalPrice;
+				}
 			}
 		}
 

@@ -67,6 +67,12 @@ namespace ToyEcommerceASPNET.Services
 			_cart.ReplaceOne(cart => cart.UserId == id, cartIn);
 		}
 
+		public void ClearCartProducts(Cart cart)
+		{
+			cart.Products.Clear();
+			_cart.ReplaceOne(cart => cart.UserId == cart.UserId, cart);
+		}
+
 		public void DeleteCart(string id)
 		{
 			_cart.DeleteOne(cart => cart.Id == id);

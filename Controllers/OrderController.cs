@@ -12,10 +12,12 @@ namespace ToyEcommerceASPNET.Controllers
 	public class OrderController : ControllerBase
 	{
 		private readonly IOrderService _orderService;
+		private readonly ICartService _cartService;
 
-		public OrderController(IOrderService orderService)
+		public OrderController(IOrderService orderService, ICartService cartService)
 		{
 			_orderService = orderService;
+			_cartService = cartService;
 		}
 
 		// GET: api/<OrderController>
@@ -71,8 +73,39 @@ namespace ToyEcommerceASPNET.Controllers
 
 		}
 
-		// GET api/<OrderController>/5
 		[HttpGet("{id}")]
+		public async Task<IActionResult> GetOrderById([FromRoute] string id)
+		{
+			try
+			{
+				var order = _orderService.GetOrderById(id);
+
+				if (order == null)
+				{
+					return new NotFoundObjectResult(new
+					{
+						status = "error",
+						message = "Order not found"
+					});
+				}
+
+				return new OkObjectResult(new
+				{
+					status = "success",
+					order = order
+				});
+			}catch (Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
+		}
+
+		// GET api/<OrderController>/5
+		[HttpGet("userOrder/{id}")]
 		public async Task<IActionResult> GetOrderByUSerId(string id)
 		{
 			try
@@ -104,21 +137,80 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// POST api/<OrderController>
-		[HttpPost]
-		public void Post([FromBody] string value)
+		[HttpPost("{id}")]
+		public async Task<IActionResult> CreateOrder( [FromRoute] string id,[FromBody] Order order)
 		{
+			try
+			{
+				var cart = _cartService.GetCartByUserId(id);
+
+				if (cart == null)
+				{
+					return BadRequest(new { status = "error", message = "Cart does not exist" });
+				}
+
+				// Check if cart.Products is not null before accessing it
+				var orderItems = cart.Products?.Select(cartItem => new OrderItem
+				{
+					ProductId = cartItem.ProductId,
+					Quantity = cartItem.Quantity
+				}).ToList();
+
+				if (orderItems == null)
+				{
+					return BadRequest(new { status = "error", message = "Cart has no products" });
+				}
+
+				var newOrder = new Order
+				{
+					UserId = id,
+					Products = orderItems,
+					ShippingAddress = order.ShippingAddress,
+					Phone = order.Phone,
+					TotalCost = order.TotalCost
+				};
+
+				 _orderService.CreateOrder(newOrder);
+
+				//empty user cart
+				//_cartService.ClearCartProducts(cart);
+
+				return new OkObjectResult(new
+				{
+					status = "success",
+					order = newOrder
+				});
+
+
+			}
+			catch (Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
 		}
 
 		// PUT api/<OrderController>/5
 		[HttpPut("{id}")]
-		public void Put(int id, [FromBody] string value)
+		public async Task<IActionResult> ConfirmOrder(int id, [FromBody] string value)
 		{
+			try
+			{
+				return null;
+			}
+			catch(Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
 		}
 
-		// DELETE api/<OrderController>/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
-		{
-		}
+	
 	}
 }

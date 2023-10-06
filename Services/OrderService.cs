@@ -26,7 +26,7 @@ namespace ToyEcommerceASPNET.Services
 
 		public List<Order> GetAllOrders()
 		{
-			return _order.Find(cart => true).ToList();
+			return _order.Find(order => true).ToList();
 
 		}
 
@@ -40,6 +40,11 @@ namespace ToyEcommerceASPNET.Services
 
 		}
 
+		public Order GetOrderById(string id)
+		{
+			return _order.Find(order => order.Id == id).FirstOrDefault();
+		}
+
 		public async Task<long> CountOrdersAsync()
 		{
 			// Count documents in the "users" collection
@@ -49,25 +54,25 @@ namespace ToyEcommerceASPNET.Services
 
 		public Order GetOrderByUserId(string id)
 		{
-			return _order.Find(cart => cart.UserId == id).FirstOrDefault();
+			return _order.Find(order => order.UserId == id).FirstOrDefault();
 		}
 
 
-		public Order CreateOrder(Order cart)
+		public Order CreateOrder(Order order)
 		{
 			
-			_order.InsertOne(cart);
-			return cart;
+			_order.InsertOne(order);
+			return order;
 		}
 
-		public void UpdateOrder(string id, Order cartIn)
+		public void UpdateOrder(string id, Order orderIn)
 		{
-			_order.ReplaceOne(cart => cart.UserId == id, cartIn);
+			_order.ReplaceOne(order => order.UserId == id, orderIn);
 		}
 
 		public void DeleteOrder(string id)
 		{
-			_order.DeleteOne(cart => cart.Id == id);
+			_order.DeleteOne(order => order.Id == id);
 		}
 	}
 }

@@ -11,6 +11,8 @@ namespace ToyEcommerceASPNET.Services.interfaces
 		Cart CreateCart(Cart cart);
 		void UpdateCart(string id, Cart cartIn);
 		void DeleteCart(string id);
+
+		void ClearCartProducts(Cart cart);
 		//void RemoveCart(string id);
 	}
 }
