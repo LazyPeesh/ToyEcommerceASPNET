@@ -9,7 +9,7 @@ namespace ToyEcommerceASPNET.Services.interfaces
 		Task<List<Cart>> GetCarts(int page, int pageSize);
 		Cart GetCartByUserId(string id);
 		Cart CreateCart(Cart cart);
-		//void UpdateCart(string id, Cart cart);
+		void UpdateCart(string id, Cart cartIn);
 		//void RemoveCart(string id);
 	}
 }

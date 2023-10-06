@@ -109,9 +109,15 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-			/*	 var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+				/*	 var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-				cart.UserId = userId;*/
+					cart.UserId = userId;*/
+				var cartCreate = new Cart
+				{
+					UserId = cart.UserId,
+					Products = cart.Products,
+/*					TotalPrice = cart.TotalPrice
+*/				};
 
 					_cartService.CreateCart(cart);
 
@@ -135,18 +141,48 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// PUT api/<CartController>/5
 		[HttpPut("{id}")]
-		public async Task<IActionResult> Put(int id, [FromBody] string productId, int quantity)
+		public async Task<IActionResult> Put([FromRoute] string id, [FromBody] CartItem cartItems)
 		{
 			try
 			{
-				var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+/*				var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+ *				
+*/
+				
+				var cart = _cartService.GetCartByUserId(id);
+				if (cart == null)
+				{
+					cart = new Cart
+					{
+						UserId = id,
+						Products = new List<CartItem>(),
+/*						TotalPrice = 0
+*/					};
+				}
 
+				var existingProduct = cart.Products.FirstOrDefault(p => p.ProductId == cartItems.ProductId);
+				if (existingProduct != null)
+				{
+					existingProduct.Quantity += cartItems.Quantity;
+				}
+				else
+				{
+					cart.Products.Add(new CartItem
+					{
+						ProductId = cartItems.ProductId,
+						Quantity = cartItems.Quantity
+					});
+				}
+
+
+				_cartService.UpdateCart(id, cart);
 
 
 				return new OkObjectResult(new
 				{
 					status = "success",
-					message = "Cart updated successfully"
+					message = "Cart updated successfully",
+					cart = cart
 				});
 
 			}catch(Exception e)
@@ -158,6 +194,44 @@ namespace ToyEcommerceASPNET.Controllers
 				});
 			}
 
+		}
+
+		// DELETE api/<CartController>/5
+		[HttpDelete("Item/{id}")]
+		public async Task<IActionResult> DeleteCartItems([FromRoute] string id, [FromBody] string productId)
+		{
+			try
+			{
+				var cart = _cartService.GetCartByUserId(id);
+				if (cart == null)
+				{
+					return new NotFoundObjectResult(new
+					{
+						status = "error",
+						message = "Cart not found"
+					});
+				}
+				var existingProduct = cart.Products.FirstOrDefault(p => p.ProductId == productId);
+				if (existingProduct != null)
+				{
+					cart.Products.Remove(existingProduct);
+				}
+				_cartService.UpdateCart(id, cart);
+				return new OkObjectResult(new
+				{
+					status = "success",
+					message = "Item was deleted",
+					cart = cart
+				});
+			}
+			catch (Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
 		}
 
 		// DELETE api/<CartController>/5

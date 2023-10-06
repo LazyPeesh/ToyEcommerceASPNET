@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Models.interfaces;
@@ -53,10 +54,17 @@ namespace ToyEcommerceASPNET.Services
 
 		public Cart CreateCart(Cart cart)
 		{
+			// Log the cart object before insertion
+			Console.WriteLine($"Inserting cart: {cart.ToJson()}");
 			_cart.InsertOne(cart);
+			// Log the cart object after insertion (optional)
+			Console.WriteLine($"Inserted cart: {cart.ToJson()}");
 			return cart;
 		}
 
-	
+		public void UpdateCart(string id, Cart cartIn)
+		{
+			_cart.ReplaceOne(cart => cart.UserId == id, cartIn);
+		}
 	}
 }
