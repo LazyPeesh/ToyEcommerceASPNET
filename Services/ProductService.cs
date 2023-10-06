@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using ToyEcommerceASPNET.Data;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Models.interfaces;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -10,22 +12,15 @@ namespace ToyEcommerceASPNET.Services;
 
 public class ProductService : IProductService
 {
-	private readonly IMongoCollection<Product> _products;
-
-	public ProductService(IOptions<DatabaseSettings> databaseSettings)
+	private readonly APIDbContext _context;
+	public ProductService(APIDbContext context)
 	{
-		var mongoClient = new MongoClient(databaseSettings.Value.ConnectionString);
-
-		var mongoDatabase = mongoClient.GetDatabase(
-			databaseSettings.Value.DatabaseName);
-
-		_products = mongoDatabase.GetCollection<Product>(
-			databaseSettings.Value.ProductCollectionName);
+		this._context = context;
 	}
 
 	public async Task<Object> GetAllAsync(int? queryPage)
 	{
-		var products = await _products.Find(product => true).ToListAsync();
+		var products = await _context.Products.ToListAsync();
 
 		int page = queryPage.GetValueOrDefault(1) <= 0 ? 1 : queryPage.GetValueOrDefault(1);
 		int perPage = 2;    // number of items per page
@@ -42,28 +37,29 @@ public class ProductService : IProductService
 		return data;
 	}
 
-	public async Task<Product> GetById(string id)
+	public async Task<Product> GetById(int id)
 	{
-		return await _products.Find(product => product.Id == id).FirstOrDefaultAsync();
+		return await _context.Products.FindAsync(id);
 	}
+
 	public async Task<IEnumerable<Product>> GetByCategory(string category)
 	{
-		return await _products.Find(product => product.Category == category).ToListAsync();
+		return await _context.Products.Where(product => product.Category == category).ToListAsync();
+
 	}
 
 	public async Task<Object> Search(string keyword, int? queryPage)
 	{
-		var filter = Builders<Product>.Filter.Empty;
+		IQueryable<Product> productQuery = _context.Products;
 
 		if (!string.IsNullOrEmpty(keyword))
 		{
-			filter =
-				Builders<Product>.Filter.Regex("Name", new MongoDB.Bson.BsonRegularExpression(keyword, "i")) |
-				Builders<Product>.Filter.Regex("Description", new MongoDB.Bson.BsonRegularExpression(keyword, "i")) |
-				Builders<Product>.Filter.Regex("Category", new MongoDB.Bson.BsonRegularExpression(keyword, "i"));
+			productQuery = productQuery.Where(p => p.Name.Contains(keyword) ||
+			p.Description.Contains(keyword) ||
+			p.Category.Contains(keyword));
 		}
 
-		var find = await _products.Find(filter).ToListAsync();
+		var find = await productQuery.ToListAsync();
 
 		int page = queryPage.GetValueOrDefault(1) <= 0 ? 1 : queryPage.GetValueOrDefault(1);
 		int perPage = 2;
@@ -80,17 +76,64 @@ public class ProductService : IProductService
 
 	public async Task<Product> CreateAsync(Product product)
 	{
-		await _products.InsertOneAsync(product);
+		await _context.Products.AddAsync(product);
+		await _context.SaveChangesAsync();
+
 		return product;
 	}
 
-	public async Task UpdateAsync(string id, Product product)
+	public async Task CreateImageAsync(Image image)
 	{
-		await _products.ReplaceOneAsync(product => product.Id == id, product);
+		await _context.Images.AddAsync(image);
+		await _context.SaveChangesAsync();
 	}
 
-	public async Task DeleteAsync(string id)
+	public async Task UpdateAsync(int id, Product product)
 	{
-		await _products.DeleteOneAsync(product => product.Id == id);
+		Product p = await _context.Products.FindAsync(id);
+
+		_context.Entry(p).State = EntityState.Detached;
+		_context.Attach(product);
+		try
+		{
+			_context.Update(product);
+			await _context.SaveChangesAsync();
+		}
+		catch (DbUpdateConcurrencyException)	
+		{
+			if (ProductExists(product.Id))
+				throw;
+		}
 	}
+
+	public async Task DeleteAsync(int id)
+	{
+		var product = await _context.Products.FindAsync(id);
+		if (product != null)
+		{
+			_context.Products.Remove(product);
+			await _context.SaveChangesAsync();
+		}
+	}
+
+	public async Task<IEnumerable<Image>> GetImagesByProductIdAsync(int id)
+	{
+		return await _context.Images.Where(image => image.Product.Id == id).ToListAsync();
+	}
+
+	public async Task DeleteImagesAsync(int id)
+	{
+		var image = await _context.Images.FindAsync(id);
+		if (image != null)
+		{
+			_context.Images.Remove(image);
+			await _context.SaveChangesAsync();
+		}
+	}
+
+	private bool ProductExists(int id)
+	{
+		return _context.Products.Any(product => product.Id == id);
+	}
+
 }

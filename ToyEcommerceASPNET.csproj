@@ -23,5 +23,9 @@
     <Compile Remove="Models\Review.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+
 
 </Project>

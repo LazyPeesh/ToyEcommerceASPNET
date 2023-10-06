@@ -6,9 +6,8 @@ namespace ToyEcommerceASPNET.Models
 {
 	public class ProductImage
 	{
-		[BsonId]
-		[BsonRepresentation(BsonType.ObjectId)]
-		public string? Id { get; set; }
+		[Key]
+		public int Id { get; set; }
 
 		[Required(ErrorMessage = "Product name is required")]
 		[MaxLength(100, ErrorMessage = "Product name cannot exceed 100 characters")]
@@ -16,10 +15,10 @@ namespace ToyEcommerceASPNET.Models
 
 		[Required(ErrorMessage = "Product price is required")]
 		[Range(0, 99999.99, ErrorMessage = "Product price must be between 0 and 99999.99")]
-		public decimal Price { get; set; } = 0.0m;
+		public double Price { get; set; } = 0;
 
 		[Required(ErrorMessage = "Product description is required")]
-		public string Description { get; set; }
+		public string Description { get; set; } = "";
 
 		[Required(ErrorMessage = "Product quantity is required")]
 		[Range(0, int.MaxValue, ErrorMessage = "Product quantity cannot be less than 0")]
@@ -27,7 +26,7 @@ namespace ToyEcommerceASPNET.Models
 
 		public double Ratings { get; set; } = 0;
 
-		public IFormFile[]? Images { get; set; }
+		public IFormFileCollection? Images { get; set; }
 
 		[Required(ErrorMessage = "Product category is required")]
 		[EnumDataType(typeof(ProductCategory))]
