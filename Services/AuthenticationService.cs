@@ -163,12 +163,9 @@ namespace ToyEcommerceASPNET.Services
                 // Return a success response with user info and tokens
                 return new OkObjectResult(new
                 {
-                    User = user,
-                    Token = new
-                    {
-                        Access_Token = accessToken,
-                        Expires_In = "1d"
-                    }
+                    user = user,
+                    access_token = accessToken,
+                    expires_in = "1d"
                 });
             }
             catch (Exception e)
@@ -187,21 +184,55 @@ namespace ToyEcommerceASPNET.Services
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_config["Jwt:Secret"]);
+            var issuer = _config["Jwt:Issuer"];
+            var audience = _config["Jwt:Audience"];
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.IsAdmin ? "true" : "false")
+            };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email)
-                }),
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature)
+                    SecurityAlgorithms.HmacSha256Signature),
+                Issuer = issuer,
+                Audience = audience
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public bool IsValidAPIToken(string token)
+        {
+            var key = Encoding.ASCII.GetBytes(_config["Jwt:Secret"]);
+            var issuer = _config["Jwt:Issuer"];
+            var mySecurityKey = new SymmetricSecurityKey(key);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                tokenHandler.ValidateToken(token,
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidIssuer = issuer,
+                        ValidAudience = issuer,
+                        IssuerSigningKey = mySecurityKey,
+                    }, out SecurityToken validatedToken);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

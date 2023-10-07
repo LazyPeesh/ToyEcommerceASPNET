@@ -1,4 +1,7 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using ToyEcommerceASPNET.Models.interfaces;
 using ToyEcommerceASPNET.Services;
@@ -11,6 +14,7 @@ namespace ToyEcommerceASPNET
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var config = builder.Configuration;
 
             // Add services to the container.
             builder.Services.Configure<DatabaseSettings>(
@@ -24,6 +28,25 @@ namespace ToyEcommerceASPNET
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = config["Jwt:Issuer"],
+                    ValidAudience = config["Jwt:Issuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Secret"])),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true
+                };
+            });
 
             // Create swagger document for APIs
             builder.Services.AddSwaggerGen(c =>
@@ -49,6 +72,7 @@ namespace ToyEcommerceASPNET
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

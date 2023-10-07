@@ -6,7 +6,7 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/auth")]
     [ApiController]
     public class AuthenticationController : Controller
     {
