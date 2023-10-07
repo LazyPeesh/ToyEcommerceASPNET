@@ -15,6 +15,5 @@ namespace ToyEcommerceASPNET.Models
 		public int? Quantity { get; set; }
 
 		public Product? Product { get; set; } // Reference to the associated product
-
 	}
 }
