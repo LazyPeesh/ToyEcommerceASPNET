@@ -1,7 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Amazon.Runtime.Internal;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json;
+using System.IO;
+using System.Linq.Expressions;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services;
 using ToyEcommerceASPNET.Services.interfaces;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,88 +18,354 @@ namespace ToyEcommerceASPNET.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, IWebHostEnvironment environment)
         {
             _productService = productService;
+            _environment = environment;
         }
 
-		// GET: api/v1/products
-		[HttpGet]
-        public ActionResult<List<Product>> Get()
+        // GET: api/v1/products
+        [HttpGet]
+        public async Task<IActionResult> GetAllProducts([FromQuery(Name = "page")] int page)
         {
-            return _productService.GetAll();
+            try
+            {
+                var products = await _productService.GetAllProductsAsync(page);
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
         }
 
-		// GET api/v1/products/{id}
-		[HttpGet("{id}")]
-        public ActionResult<Product> Get(string id)
+        // GET api/v1/products/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProduct([FromRoute] string id)
         {
-            var product = _productService.GetById(id);
+            try
+            {
+                var product = await _productService.GetProductById(id);
 
-            if (product == null)
-                return NotFound($"Product with Id = {id} not found");
+                if (product == null)
+                    return NotFound($"Product with Id = {id} not found");
 
-            return product;
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    product
+                });
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
         }
 
-		// GET api/v1/products/keyword/{keyword}
-		[HttpGet("keyword/{keyword}")]
-		public ActionResult<List<Product>> Search(string keyword)
-		{
-			var product = _productService.Search(keyword);
-
-			if (product == null)
-				return NotFound($"Product with keywork = {keyword} not found");
-
-			return product;
-		}
-
-		// GET api/v1/products/category/{category}
-		[HttpGet("category/{category}")]
-		public ActionResult<List<Product>> GetByCategory(string category)
-		{
-			var product = _productService.GetByCategory(category);
-
-			if (product == null)
-				return NotFound($"Product with category = {category} not found");
-
-			return product;
-		}
-
-		// POST api/v1/products
-		[HttpPost]
-        public ActionResult<Product> Post([FromBody] Product product)
+        // GET api/v1/products/search?keyword
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProducts(
+            [FromQuery(Name = "keyword")] string keyword,
+            [FromQuery(Name = "page")] int page)
         {
-            _productService.Create(product);
+            try
+            {
+                var product = await _productService.SearchProductsAsync(keyword, page);
 
-            return CreatedAtAction(nameof(Get), new {id =  product.Id}, product);
+                if (product == null)
+                    return NotFound($"Product with keywork = {keyword} not found");
+
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    product
+                });
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
         }
 
-		// PUT api/v1/products/{id}
-		[HttpPut("{id}")]
-        public ActionResult Put(string id, [FromBody] Product product)
+        // GET api/v1/products/category/{category}
+        [HttpGet("category/{category}")]
+        public async Task<IActionResult> GetProductsByCategory(string category)
         {
-			var existingProduct = _productService.GetById(id);
+            try
+            {
+                var products = await _productService.GetProductsByCategory(category);
 
-			if (existingProduct == null)
-				return NotFound($"Product with Id = {id} not found");
+                if (products.Count() == 0)
+                    return new BadRequestObjectResult(new
+                    {
+                        status = "error",
+                        message = $"Product with category = {category} not found"
+                    });
 
-            _productService.Update(id, product);
-			return NoContent();
-		}
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    products
+                });
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
+        }
 
-		// DELETE api/v1/products/{id}
-		[HttpDelete("{id}")]
-        public ActionResult Delete(string id)
+        // POST api/v1/products
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromForm] ProductImage p)
         {
-			var existingProduct = _productService.GetById(id);
+            try
+            {
+                // Create a new Product model base on ProductImage model
+                var product = new Product
+                {
+                    Name = p.Name,
+                    Price = p.Price,
+                    Description = p.Description,
+                    Ratings = p.Ratings,
+                    Category = p.Category
+                };
+                await _productService.CreateProductAsync(product);
 
-			if (existingProduct == null)
-				return NotFound($"Product with Id = {id} not found");
+                try
+                {
+                    // Update images file path for Product
+                    if (p.Images != null)
+                    {
+                        List<string> images = await UploadImages(p.Images, product.Id);
+                        product.Images = images;    // Add images path
+                        await _productService.UpdateProductAsync(product.Id, product);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
 
-            _productService.Remove(id);
-			return Ok($"Product with Id = {id} deleted");
-		}
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    message = "Product created successfully",
+                    product
+                });
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
+        }
+
+        // PUT api/v1/products/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct([FromRoute] string id, [FromForm] ProductImage p)
+        {
+            try
+            {
+                var existingProduct = await _productService.GetProductById(id);
+
+                if (existingProduct == null)
+                    return new BadRequestObjectResult(new
+                    {
+                        status = "error",
+                        message = $"Product with Id = {id} not found"
+                    });
+
+                // Create a new Product model base on ProductImage model
+                var product = new Product
+                {
+                    Id = id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Description = p.Description,
+                    Ratings = p.Ratings,
+                    Category = p.Category
+                };
+
+                try
+                {
+                    // Add the images array to the product object
+                    if (p.Images != null && p.Images.Count() > 0)
+                    {
+                        // Upload new images to file and return list of image paths
+                        List<string> uploadImages = await UploadImages(p.Images, id);
+
+                        var imagesToDelete = new List<string>();
+                        // Filter images that need to be remove
+                        if (p.KeptImages.Count() != 0)
+                        {
+                            imagesToDelete = existingProduct.Images.Where(image => !p.KeptImages.Contains(image)).ToList();
+                        }
+                        else
+                        {
+                            imagesToDelete = existingProduct.Images;
+                        }
+                        // Remove not kept images
+                        await RemoveImages(imagesToDelete);
+
+                        // Add images path to Product
+                        product.Images = p.KeptImages;
+                        if (product.Images.Count() != 0)
+                        {
+                            foreach (var image in uploadImages)
+                                if (!product.Images.Contains(image))
+                                    product.Images.Add(image);
+                        }
+                        else
+                        {
+                            product.Images = uploadImages;
+                        }
+                    }
+                    else
+                    {
+                        var imagesToDelete = existingProduct.Images.Where(image => !p.KeptImages.Contains(image)).ToList();
+                        await RemoveImages(imagesToDelete);
+                        product.Images = p.KeptImages;
+                    }
+
+                    await _productService.UpdateProductAsync(id, product);
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    message = "Product updated successfully",
+                    product
+                });
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
+
+        }
+
+        // DELETE api/v1/products/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct([FromRoute] string id)
+        {
+            try
+            {
+                var existingProduct = await _productService.GetProductById(id);
+
+                if (existingProduct == null)
+                    return new BadRequestObjectResult(new
+                    {
+                        status = "error",
+                        message = $"Product with Id = {id} not found"
+                    });
+
+                try
+                {
+                    await RemoveImages(existingProduct.Images);
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+                await _productService.DeleteProductAsync(id);
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    message = $"Product with Id = {id} deleted successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
+        }
+
+        private async Task<List<string>> UploadImages(IFormFileCollection fileImages, string productId)
+        {
+            List<string> images = new List<string>();
+            foreach (var file in fileImages)
+            {
+                string filePath = GetFilePath();
+
+                // Create new file for images if not exist
+                if (!System.IO.Directory.Exists(filePath + "\\" + productId))
+                {
+                    System.IO.Directory.CreateDirectory(filePath + productId);
+                }
+
+                // Add images in file and return string path
+                string path = filePath + productId + "\\" + file.FileName;
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+                using (var stream = System.IO.File.Create(path))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                string imagePath = "\\productImages\\" + productId + "\\" + file.FileName;
+                images.Add(imagePath);
+            }
+            return images;
+        }
+
+        private async Task RemoveImages(List<string> imagePaths)
+        {
+            try
+            {
+                foreach (var imagePath in imagePaths)
+                {
+                    string path = this._environment.WebRootPath + imagePath;
+
+                    if (System.IO.File.Exists(path))
+                    {
+                        System.IO.File.Delete(path);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [NonAction]
+        private string GetFilePath()
+        {
+            return this._environment.WebRootPath + "\\productImages\\";
+        }
+
     }
 }

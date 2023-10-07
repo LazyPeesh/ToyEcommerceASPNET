@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ToyEcommerceASPNET.Models
 {
-	public class Product
+	public class ProductImage
 	{
 		[BsonId]
 		[BsonRepresentation(BsonType.ObjectId)]
-		public string Id { get; set; }
+		public string? Id { get; set; }
 
 		[Required(ErrorMessage = "Product name is required")]
 		[MaxLength(100, ErrorMessage = "Product name cannot exceed 100 characters")]
@@ -27,10 +27,12 @@ namespace ToyEcommerceASPNET.Models
 
 		public double Ratings { get; set; } = 0;
 
-		public List<string> Images { get; set; } = new List<string> { };
+		public IFormFileCollection? Images { get; set; }
 
 		[Required(ErrorMessage = "Product category is required")]
 		[EnumDataType(typeof(ProductCategory))]
 		public string Category { get; set; }
+
+		public List<string> KeptImages { get; set; } = new List<string> { };
 	}
 }

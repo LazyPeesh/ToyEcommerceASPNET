@@ -4,10 +4,12 @@ namespace ToyEcommerceASPNET.Services.interfaces
 {
 	public interface IUserService
 	{
-		List<User> GetUsers();
+		Task<List<User>> GetUsers(int page,int pageSize);
 		User GetUserById(string id);
 		User CreateUser(User user);
-		void UpdateUser(string id, User user);
+		Task UpdateUser(string id, User user);
 		void RemoveUser(string id);
+
+		Task<long> CountUsersAsync();
 	}
 }
