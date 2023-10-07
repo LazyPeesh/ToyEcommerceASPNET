@@ -27,7 +27,7 @@ namespace ToyEcommerceASPNET.Models
 
 		public double Ratings { get; set; } = 0;
 
-		public IFormFile[]? Images { get; set; }
+		public IFormFileCollection? Images { get; set; }
 
 		[Required(ErrorMessage = "Product category is required")]
 		[EnumDataType(typeof(ProductCategory))]

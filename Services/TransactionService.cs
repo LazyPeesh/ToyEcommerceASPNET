@@ -22,10 +22,10 @@ namespace ToyEcommerceASPNET.Services
 
 			var data = new
 			{
-				transaction = transactions.Skip((page - 1) * perPage).Take(perPage),
-				total,
-				page,
-				last_page = Math.Ceiling((double)total / perPage)
+				status = "success",
+				transactions = transactions.Skip((page - 1) * perPage).Take(perPage),
+				totalPage = total,
+                totalLength = page
 			};
 
 			return data;
