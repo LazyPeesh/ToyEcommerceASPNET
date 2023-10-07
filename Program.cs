@@ -1,14 +1,18 @@
+
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
+using ToyEcommerceASPNET.Data;
 using ToyEcommerceASPNET.Models.interfaces;
 using ToyEcommerceASPNET.Services;
 using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET
 {
+
     public class Program
     {
         public static void Main(string[] args)
@@ -23,9 +27,11 @@ namespace ToyEcommerceASPNET
             builder.Services.AddTransient<IProductService, ProductService>();
             builder.Services.AddTransient<IUserService, UserService>();
  
-			builder.Services.AddTransient<ICartService, CartService>();
+		      	builder.Services.AddTransient<ICartService, CartService>();
 
-			builder.Services.AddTransient<IOrderService, OrderService>();
+			          builder.Services.AddTransient<IOrderService, OrderService>();
+          			builder.Services.AddTransient<ITransactionService, TransactionService>();
+
             builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 
             builder.Services.AddMvc();
@@ -61,6 +67,11 @@ namespace ToyEcommerceASPNET
                     Version = "v1"
                 });
             });
+          
+          			// Dependency Injection of DbContext Class
+			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+			builder.Services.AddDbContext<ApplicationDbContext>(options =>
+			options.UseSqlServer(connectionString));
 
             var app = builder.Build();
 
