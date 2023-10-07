@@ -123,7 +123,7 @@ namespace ToyEcommerceASPNET.Controllers
                 return new OkObjectResult(new
                 {
                     status = "success",
-                    message = $"Product with Id = {id} updated successfully"
+                    message = $"Product with Id = {id} updated successfully",
                     updateTransaction
                 });
             }
