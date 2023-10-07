@@ -8,7 +8,7 @@ namespace ToyEcommerceASPNET.Models
 	{
 		[BsonId]
 		[BsonRepresentation(BsonType.ObjectId)]
-		public string Id { get; set; }
+		public string? Id { get; set; }
 
 		[Required(ErrorMessage = "Product name is required")]
 		[MaxLength(100, ErrorMessage = "Product name cannot exceed 100 characters")]

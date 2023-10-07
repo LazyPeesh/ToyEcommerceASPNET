@@ -9,7 +9,7 @@ namespace ToyEcommerceASPNET.Services.interfaces
 		Task<Product> GetProductById(string id);
 		Task<IEnumerable<Product>> GetProductsByCategory(string category);
 		Task<Object> SearchProductsAsync(string keyword, int? queryPage);
-		Task<Product> CreateProductAsync(Product product);
+		Task CreateProductAsync(Product product);
 		Task UpdateProductAsync(string id, Product product);
 		Task DeleteProductAsync(string id);
 	}

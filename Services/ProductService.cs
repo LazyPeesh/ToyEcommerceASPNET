@@ -35,9 +35,9 @@ public class ProductService : IProductService
         {
             status = "success",
             products = products.Skip((page - 1) * perPage).Take(perPage),
-            totalPage = total,
-            totalLength = page
-        };
+            totalPage = Math.Ceiling((double)total / perPage),
+            totalLength = total
+		};
     }
 
     public async Task<Product> GetProductById(string id)
@@ -69,17 +69,16 @@ public class ProductService : IProductService
 
         return new
         {
-            product = find.Skip((page - 1) * perPage).Take(perPage).ToList(),
-            total,
-            page,
-            last_page = Math.Ceiling((double)total / perPage)
-        };
+			status = "success",
+			product = find.Skip((page - 1) * perPage).Take(perPage).ToList(),
+			totalPage = Math.Ceiling((double)total / perPage),
+			totalLength = total
+		};
     }
 
-    public async Task<Product> CreateProductAsync(Product product)
+    public async Task CreateProductAsync(Product product)
     {
         await _products.InsertOneAsync(product);
-        return product;
     }
 
     public async Task UpdateProductAsync(string id, Product product)
