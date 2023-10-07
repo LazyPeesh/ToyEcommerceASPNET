@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Models.interfaces;
@@ -26,9 +27,14 @@ namespace ToyEcommerceASPNET.Services
 			return user;
 		}
 
-		public List<User> GetUsers()
+		public Task<List<User>> GetUsers(int page,int pageSize)
 		{
-			return _users.Find(user => true).ToList();
+
+			return   _users.Find(u => true)
+					.Skip((page - 1) * pageSize)
+					.Limit(pageSize)
+					.ToListAsync();
+		
 		}
 
 		public User GetUserById(string id)
@@ -41,9 +47,16 @@ namespace ToyEcommerceASPNET.Services
 			_users.DeleteOne(user => user.Id == id);
 		}
 
-		public void UpdateUser(string id, User user)
+		public async Task UpdateUser(string id, User user)
 		{
-			_users.ReplaceOne(user => user.Id == id, user);
+			
+			await	_users.FindOneAndReplaceAsync(user => user.Id == id, user);
+		}
+
+		public async Task<long> CountUsersAsync()
+		{
+			// Count documents in the "users" collection
+			return await _users.CountDocumentsAsync(user => true);
 		}
 	}
 }

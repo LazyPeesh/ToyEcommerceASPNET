@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
 
@@ -6,7 +7,7 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("api/v1/user")]
 	[ApiController]
 	public class UserController : ControllerBase
 	{
@@ -18,56 +19,188 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 		// GET: api/<UserController>
 		[HttpGet]
-		public ActionResult<List<User>> Get()
+		public async Task<IActionResult> GetUsers([FromQuery] int page = 1)
 		{
-			return _userService.GetUsers();
+			try
+			{
+				// Adjust page size as needed
+				int pageSize = 10;
+
+				// Count total users
+				long totalUsers =  await _userService.CountUsersAsync();
+
+				// Calculate total pages
+				int totalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
+
+				if (page < 1 || page > totalPages)
+				{
+					return new BadRequestObjectResult(new
+					{
+						status = "error",
+						Message = "Invalid page number"
+					});
+				}
+
+				// Get users for the specified page
+				var users =  _userService.GetUsers(page, pageSize);
+
+				if (users == null)
+				{
+					return new OkObjectResult(new
+					{
+						status = "success",
+						users = Enumerable.Empty<User>(),
+						totalPage = 0,
+						totalLength = 0
+					});
+				}
+
+				return new OkObjectResult(new
+				{
+					status = "success",
+					user = users,
+					totalPage = totalPages,
+					totalLength = totalUsers
+				});
+			}
+			catch (Exception e) { 
+				return new BadRequestObjectResult(new
+				{
+					status = "error",
+					Message = e.Message
+				});
+			}
+		
 		}
 
 		// GET api/<UserController>/5
 		[HttpGet("{id}")]
-		public ActionResult<User> Get(string id)
+		public async Task<IActionResult> GetUserById( [FromRoute] string id)
 		{
-			var user = _userService.GetUserById(id);
+			try
+			{
+				var user = _userService.GetUserById(id);
+				if (user == null)
+					return new BadRequestObjectResult(new
+					{
 
-			if (user == null)
-				return NotFound($"Student with Id = {id} not found");
+						status = "error",
+						Message = "User not found"
+					});
 
-			return user;
+				return new OkObjectResult( new { 
+					status = "success",
+					Message = "User found",
+					user });
+			}
+			catch(Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					status = "error",
+					Message = e.Message
+				});
+			}
 		}
 
 		// POST api/<UserController>
 		[HttpPost]
-		public ActionResult<User> Post([FromBody] User user)
+		public async Task<IActionResult> Post(string fullname, string email, string password)
 		{
-			_userService.CreateUser(user);
+			try
+			{
+				var user = new User
+				{
+					FullName = fullname,
+					Email = email,
+					Password = password // Store the hashed password
+				};
 
-			return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
+				_userService.CreateUser(user);
+
+				return new OkObjectResult(new
+				{
+					status = "success",
+					user = user
+				});
+			}catch(Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					status = "error",
+					Message = e.Message
+				});
+			}
+			
 		}
 
 		// PUT api/<UserController>/5
 		[HttpPut("{id}")]
-		public ActionResult Put(string id, [FromBody] User user)
+		public async Task<IActionResult> Put([FromRoute] string id, [FromBody] User user)
 		{
-			var existingUser = _userService.GetUserById(id);
+			try
+			{
+				var existingUser = _userService.GetUserById(id);
 
-			if (existingUser == null)
-				return NotFound($"User with Id = {id} not found");
+				if (existingUser == null)
+				  return new BadRequestObjectResult(new
+				 {
 
-			_userService.UpdateUser(id, user);
-			return NoContent();
+					 status = "error",
+					 Message = "Invalid page number"
+				 });
+
+
+				_userService.UpdateUser(id, user);
+				return new ObjectResult(new
+				{
+					status = "success",
+					message = "User was updated",
+					user = user
+				});
+			}
+			catch(Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					status = "error",
+					Message = e.Message
+				});
+			}
+		
 		}
 
 		// DELETE api/<UserController>/5
 		[HttpDelete("{id}")]
-		public ActionResult Delete(string id)
+		public async Task<IActionResult> Delete([FromRoute] string id)
 		{
-			var existingUser = _userService.GetUserById(id);
+			try
+			{
+				var existingUser = _userService.GetUserById(id);
 
-			if (existingUser == null)
-				return NotFound($"User with Id = {id} not found");
+				if (existingUser == null)
+					return new BadRequestObjectResult(new
+					{
+
+						status = "error",
+						Message = "User not found"
+					});
+
+				_userService.RemoveUser(id);
+				return new OkObjectResult(new
+				{
+					Message = "User was deleted"
+				});
+			}
+			catch(Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					status = "error",
+					Message = e.Message
+				});
+			}
 			
-			_userService.RemoveUser(id);
-			return NoContent();
 		}
 	}
 }

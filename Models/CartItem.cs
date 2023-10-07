@@ -7,11 +7,13 @@ namespace ToyEcommerceASPNET.Models
 	{
 		[BsonId]
 		[BsonRepresentation(BsonType.ObjectId)]
-		public string Id { get; set; }
+		public string? Id { get; set; }
 
 		[BsonRepresentation(BsonType.ObjectId)]
-		public string ProductId { get; set; }
+		public string? ProductId { get; set; }
 
-		public int Quantity { get; set; }
+		public int? Quantity { get; set; }
+
+		public Product? Product { get; set; } // Reference to the associated product
 	}
 }
