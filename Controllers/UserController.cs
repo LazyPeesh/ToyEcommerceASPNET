@@ -7,7 +7,7 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("api/v1/user")]
 	[ApiController]
 	public class UserController : ControllerBase
 	{
@@ -34,7 +34,11 @@ namespace ToyEcommerceASPNET.Controllers
 
 				if (page < 1 || page > totalPages)
 				{
-					return BadRequest("Invalid page number");
+					return new BadRequestObjectResult(new
+					{
+						status = "error",
+						Message = "Invalid page number"
+					});
 				}
 
 				// Get users for the specified page
@@ -62,7 +66,7 @@ namespace ToyEcommerceASPNET.Controllers
 			catch (Exception e) { 
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
@@ -77,15 +81,23 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				var user = _userService.GetUserById(id);
 				if (user == null)
-					return NotFound($"Student with Id = {id} not found");
+					return new BadRequestObjectResult(new
+					{
 
-				return new OkObjectResult( new { user });
+						status = "error",
+						Message = "User not found"
+					});
+
+				return new OkObjectResult( new { 
+					status = "success",
+					Message = "User found",
+					user });
 			}
 			catch(Exception e)
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
@@ -108,13 +120,14 @@ namespace ToyEcommerceASPNET.Controllers
 
 				return new OkObjectResult(new
 				{
+					status = "success",
 					user = user
 				});
 			}catch(Exception e)
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
@@ -145,7 +158,7 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
@@ -173,7 +186,7 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
