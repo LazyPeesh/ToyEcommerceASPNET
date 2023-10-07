@@ -39,7 +39,7 @@ namespace ToyEcommerceASPNET
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = config["Jwt:Issuer"],
-                    ValidAudience = config["Jwt:Issuer"],
+                    ValidAudience = config["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Secret"])),
                     ValidateIssuer = true,
                     ValidateAudience = true,

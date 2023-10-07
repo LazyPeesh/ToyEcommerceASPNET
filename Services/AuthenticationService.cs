@@ -199,40 +199,13 @@ namespace ToyEcommerceASPNET.Services
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature),
+                    SecurityAlgorithms.HmacSha512Signature),
                 Issuer = issuer,
                 Audience = audience
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
-        }
-
-        public bool IsValidAPIToken(string token)
-        {
-            var key = Encoding.ASCII.GetBytes(_config["Jwt:Secret"]);
-            var issuer = _config["Jwt:Issuer"];
-            var mySecurityKey = new SymmetricSecurityKey(key);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            try
-            {
-                tokenHandler.ValidateToken(token,
-                    new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidIssuer = issuer,
-                        ValidAudience = issuer,
-                        IssuerSigningKey = mySecurityKey,
-                    }, out SecurityToken validatedToken);
-            }
-            catch
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 }
