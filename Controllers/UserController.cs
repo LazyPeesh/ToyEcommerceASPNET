@@ -143,7 +143,12 @@ namespace ToyEcommerceASPNET.Controllers
 				var existingUser = _userService.GetUserById(id);
 
 				if (existingUser == null)
-				 return NotFound(new { status = "error", message = "User not found" });
+				  return new BadRequestObjectResult(new
+				 {
+
+					 status = "error",
+					 Message = "Invalid page number"
+				 });
 
 
 				_userService.UpdateUser(id, user);
@@ -174,7 +179,12 @@ namespace ToyEcommerceASPNET.Controllers
 				var existingUser = _userService.GetUserById(id);
 
 				if (existingUser == null)
-					return NotFound($"User with Id = {id} not found");
+					return new BadRequestObjectResult(new
+					{
+
+						status = "error",
+						Message = "User not found"
+					});
 
 				_userService.RemoveUser(id);
 				return new OkObjectResult(new

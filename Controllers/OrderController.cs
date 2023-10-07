@@ -7,7 +7,7 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("api/v1")]
 	[ApiController]
 	public class OrderController : ControllerBase
 	{
@@ -21,7 +21,7 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// GET: api/<OrderController>
-		[HttpGet]
+		[HttpGet("orders")]
 		public async Task<IActionResult> GetAllOrders([FromQuery] int page = 1)
 		{
 			try
@@ -37,7 +37,11 @@ namespace ToyEcommerceASPNET.Controllers
 
 				if (page < 1 || page > totalPages)
 				{
-					return BadRequest("Invalid page number");
+					return new NotFoundObjectResult(new
+					{
+						status = "error",
+						message = "Invalid page"
+					});
 				}
 
 				// Get users for the specified page
@@ -66,7 +70,7 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
@@ -98,14 +102,14 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
 		}
 
 		// GET api/<OrderController>/5
-		[HttpGet("userOrder/{id}")]
+		[HttpGet("orders/user/{id}")]
 		public async Task<IActionResult> GetOrderByUSerId(string id)
 		{
 			try
@@ -130,7 +134,7 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
@@ -146,7 +150,11 @@ namespace ToyEcommerceASPNET.Controllers
 
 				if (cart == null)
 				{
-					return BadRequest(new { status = "error", message = "Cart does not exist" });
+					return new NotFoundObjectResult(new
+					{
+						status = "error",
+						message = "cart not found"
+					});
 				}
 
 				// Check if cart.Products is not null before accessing it
@@ -158,7 +166,11 @@ namespace ToyEcommerceASPNET.Controllers
 
 				if (orderItems == null)
 				{
-					return BadRequest(new { status = "error", message = "Cart has no products" });
+					return new NotFoundObjectResult(new
+					{
+						status = "error",
+						message = "Cart has no product"
+					});
 				}
 
 				var newOrder = new Order
@@ -187,7 +199,7 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
@@ -205,7 +217,7 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				return new BadRequestObjectResult(new
 				{
-					Status = "error",
+					status = "error",
 					Message = e.Message
 				});
 			}
