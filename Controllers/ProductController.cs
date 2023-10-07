@@ -32,7 +32,7 @@ namespace ToyEcommerceASPNET.Controllers
         {
             try
             {
-                var products = await _productService.GetAllAsync(page);
+                var products = await _productService.GetAllProductsAsync(page);
                 return Ok(products);
             }
             catch (Exception ex)
@@ -51,7 +51,7 @@ namespace ToyEcommerceASPNET.Controllers
         {
             try
             {
-                var product = await _productService.GetById(id);
+                var product = await _productService.GetProductById(id);
 
                 if (product == null)
                     return NotFound($"Product with Id = {id} not found");
@@ -72,7 +72,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
         }
 
-        // GET api/v1/products/keyword/{keyword}
+        // GET api/v1/products/search?keyword
         [HttpGet("search")]
         public async Task<IActionResult> SearchProducts(
             [FromQuery(Name = "keyword")] string keyword,
@@ -80,7 +80,7 @@ namespace ToyEcommerceASPNET.Controllers
         {
             try
             {
-                var product = await _productService.Search(keyword, page);
+                var product = await _productService.SearchProductsAsync(keyword, page);
 
                 if (product == null)
                     return NotFound($"Product with keywork = {keyword} not found");
@@ -107,7 +107,7 @@ namespace ToyEcommerceASPNET.Controllers
         {
             try
             {
-                var products = await _productService.GetByCategory(category);
+                var products = await _productService.GetProductsByCategory(category);
 
                 if (products.Count() == 0)
                     return new BadRequestObjectResult(new
@@ -147,7 +147,7 @@ namespace ToyEcommerceASPNET.Controllers
                     Ratings = p.Ratings,
                     Category = p.Category
                 };
-                await _productService.CreateAsync(product);
+                await _productService.CreateProductAsync(product);
 
                 try
                 {
@@ -156,7 +156,7 @@ namespace ToyEcommerceASPNET.Controllers
                     {
                         List<string> images = await UploadImages(p.Images, product.Id);
                         product.Images = images;    // Add images path
-                        await _productService.UpdateAsync(product.Id, product);
+                        await _productService.UpdateProductAsync(product.Id, product);
                     }
                 }
                 catch (Exception ex)
@@ -187,7 +187,7 @@ namespace ToyEcommerceASPNET.Controllers
         {
             try
             {
-                var existingProduct = await _productService.GetById(id);
+                var existingProduct = await _productService.GetProductById(id);
 
                 if (existingProduct == null)
                     return new BadRequestObjectResult(new
@@ -248,7 +248,7 @@ namespace ToyEcommerceASPNET.Controllers
                         product.Images = p.KeptImages;
                     }
 
-                    await _productService.UpdateAsync(id, product);
+                    await _productService.UpdateProductAsync(id, product);
                 }
                 catch (Exception ex)
                 {
@@ -279,7 +279,7 @@ namespace ToyEcommerceASPNET.Controllers
         {
             try
             {
-                var existingProduct = await _productService.GetById(id);
+                var existingProduct = await _productService.GetProductById(id);
 
                 if (existingProduct == null)
                     return new BadRequestObjectResult(new
@@ -297,7 +297,7 @@ namespace ToyEcommerceASPNET.Controllers
                     throw;
                 }
 
-                await _productService.DeleteAsync(id);
+                await _productService.DeleteProductAsync(id);
                 return new OkObjectResult(new
                 {
                     status = "success",

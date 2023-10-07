@@ -23,7 +23,7 @@ public class ProductService : IProductService
             databaseSettings.Value.ProductCollectionName);
     }
 
-    public async Task<Object> GetAllAsync(int? queryPage)
+    public async Task<Object> GetAllProductsAsync(int? queryPage)
     {
         var products = await _products.Find(product => true).ToListAsync();
 
@@ -40,16 +40,16 @@ public class ProductService : IProductService
         };
     }
 
-    public async Task<Product> GetById(string id)
+    public async Task<Product> GetProductById(string id)
     {
         return await _products.Find(product => product.Id == id).FirstOrDefaultAsync();
     }
-    public async Task<IEnumerable<Product>> GetByCategory(string category)
+    public async Task<IEnumerable<Product>> GetProductsByCategory(string category)
     {
         return await _products.Find(product => product.Category == category).ToListAsync();
     }
 
-    public async Task<Object> Search(string keyword, int? queryPage)
+    public async Task<Object> SearchProductsAsync(string keyword, int? queryPage)
     {
         var filter = Builders<Product>.Filter.Empty;
 
@@ -76,18 +76,18 @@ public class ProductService : IProductService
         };
     }
 
-    public async Task<Product> CreateAsync(Product product)
+    public async Task<Product> CreateProductAsync(Product product)
     {
         await _products.InsertOneAsync(product);
         return product;
     }
 
-    public async Task UpdateAsync(string id, Product product)
+    public async Task UpdateProductAsync(string id, Product product)
     {
         await _products.ReplaceOneAsync(product => product.Id == id, product);
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteProductAsync(string id)
     {
         await _products.DeleteOneAsync(product => product.Id == id);
     }
