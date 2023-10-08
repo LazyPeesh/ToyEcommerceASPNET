@@ -1,17 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
-using BCrypt.Net;
 using MongoDB.Driver;
 using ToyEcommerceASPNET.Models.interfaces;
 
@@ -46,7 +41,7 @@ namespace ToyEcommerceASPNET.Services
                 if (string.IsNullOrEmpty(request.FullName) || string.IsNullOrEmpty(request.Email))
                 {
                     // If so, return an error response
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         Status = "error",
                         Message = "Fullname and email are required"
@@ -57,7 +52,7 @@ namespace ToyEcommerceASPNET.Services
                 if (!Regex.IsMatch(request.Email, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"))
                 {
                     // If not, return an error response
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         Status = "error",
                         Message = "Email is not in the correct format"
@@ -68,7 +63,7 @@ namespace ToyEcommerceASPNET.Services
                 if (!Regex.IsMatch(request.FullName, @"^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$"))
                 {
                     // If not, return an error response
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         Status = "error",
                         Message =
@@ -81,7 +76,7 @@ namespace ToyEcommerceASPNET.Services
                 if (user != null)
                 {
                     // If so, return an error response
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         Status = "error",
                         Message = "Email is already in use"
@@ -89,10 +84,11 @@ namespace ToyEcommerceASPNET.Services
                 }
 
                 // Check if the requested password has at least 8 characters, 1 uppercase letter, 1 lowercase letter, and 1 number
-                if (!Regex.IsMatch(request.Password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$"))
+                if (!Regex.IsMatch(request.Password,
+                        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=])[A-Za-z\d@#$%^&+=]{8,}$"))
                 {
                     // If not, return an error response
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         Status = "error",
                         Message =
@@ -120,18 +116,19 @@ namespace ToyEcommerceASPNET.Services
                 // Return user info and token
                 return new OkObjectResult(new
                 {
+                    Status = "success",
                     User = user,
                     Token = new
                     {
-                        Access_Token = accessToken,
-                        Expires_In = "1d"
+                        access_token = accessToken,
+                        expires_in = "1d"
                     }
                 });
             }
             catch (Exception e)
             {
                 // Handle error and return appropriate response
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     Status = "error",
                     Message = e.Message
@@ -150,10 +147,10 @@ namespace ToyEcommerceASPNET.Services
                 if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
                 {
                     // If user not found or password incorrect, return an error response
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         Status = "error",
-                        Message = "Invalid credentials"
+                        Message = "Wrong email or password"
                     });
                 }
 
@@ -164,14 +161,17 @@ namespace ToyEcommerceASPNET.Services
                 return new OkObjectResult(new
                 {
                     user = user,
-                    access_token = accessToken,
-                    expires_in = "1d"
+                    Token = new
+                    {
+                        access_token = accessToken,
+                        expires_in = "1d"
+                    }
                 });
             }
             catch (Exception e)
             {
                 // Handle error and return appropriate response
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     Status = "error",
                     Message = e.Message

@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,7 +11,6 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET
 {
-
     public class Program
     {
         public static void Main(string[] args)
@@ -26,11 +24,11 @@ namespace ToyEcommerceASPNET
 
             builder.Services.AddTransient<IProductService, ProductService>();
             builder.Services.AddTransient<IUserService, UserService>();
- 
-		      	builder.Services.AddTransient<ICartService, CartService>();
 
-			          builder.Services.AddTransient<IOrderService, OrderService>();
-          			builder.Services.AddTransient<ITransactionService, TransactionService>();
+            builder.Services.AddTransient<ICartService, CartService>();
+
+            builder.Services.AddTransient<IOrderService, OrderService>();
+            builder.Services.AddTransient<ITransactionService, TransactionService>();
 
             builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 
@@ -67,11 +65,14 @@ namespace ToyEcommerceASPNET
                     Version = "v1"
                 });
             });
-          
-          			// Dependency Injection of DbContext Class
-			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-			builder.Services.AddDbContext<ApplicationDbContext>(options =>
-			options.UseSqlServer(connectionString));
+
+            // Add cors
+            builder.Services.AddCors();
+
+            // Dependency Injection of DbContext Class
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
 
             var app = builder.Build();
 
@@ -90,6 +91,14 @@ namespace ToyEcommerceASPNET
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseCors(builderCors =>
+            {
+                builderCors
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -97,6 +106,4 @@ namespace ToyEcommerceASPNET
             app.Run();
         }
     }
-
-
 }
