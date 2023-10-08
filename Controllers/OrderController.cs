@@ -13,11 +13,13 @@ namespace ToyEcommerceASPNET.Controllers
 	{
 		private readonly IOrderService _orderService;
 		private readonly ICartService _cartService;
+		private readonly IProductService _productService;
 
-		public OrderController(IOrderService orderService, ICartService cartService)
+		public OrderController(IOrderService orderService, ICartService cartService,IProductService productService)
 		{
 			_orderService = orderService;
 			_cartService = cartService;
+			_productService = productService;
 		}
 
 		// GET: api/<OrderController>
@@ -40,7 +42,7 @@ namespace ToyEcommerceASPNET.Controllers
 					return new NotFoundObjectResult(new
 					{
 						status = "error",
-						message = "Invalid page"
+						Message = "Invalid page"
 					});
 				}
 
@@ -77,7 +79,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 		}
 
-		[HttpGet("{id}")]
+		[HttpGet("order/{id}")]
 		public async Task<IActionResult> GetOrderById([FromRoute] string id)
 		{
 			try
@@ -89,7 +91,7 @@ namespace ToyEcommerceASPNET.Controllers
 					return new NotFoundObjectResult(new
 					{
 						status = "error",
-						message = "Order not found"
+						Message = "Order not found"
 					});
 				}
 
@@ -109,18 +111,19 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// GET api/<OrderController>/5
-		[HttpGet("orders/user/{id}")]
-		public async Task<IActionResult> GetOrderByUSerId(string id)
+		[HttpGet("orders/user")]
+		public async Task<IActionResult> GetOrderByUSerId()
 		{
 			try
 			{
+				string id = "6514faf67e6fba152fa8b99b";
 				var order = _orderService.GetOrderByUserId(id);
 				if (order == null)
 				{
 					return new NotFoundObjectResult(new
 					{
 						status = "error",
-						message = "Order not found"
+						Message = "Order not found"
 					});
 				}
 
@@ -141,11 +144,12 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// POST api/<OrderController>
-		[HttpPost("{id}")]
-		public async Task<IActionResult> CreateOrder( [FromRoute] string id,[FromBody] Order order)
+		[HttpPost("order")]
+		public async Task<IActionResult> CreateOrder( [FromBody] Order order)
 		{
 			try
 			{
+				string id = "6514faf67e6fba152fa8b99b";
 				var cart = _cartService.GetCartByUserId(id);
 
 				if (cart == null)
@@ -153,7 +157,7 @@ namespace ToyEcommerceASPNET.Controllers
 					return new NotFoundObjectResult(new
 					{
 						status = "error",
-						message = "cart not found"
+						Message = "cart not found"
 					});
 				}
 
@@ -169,7 +173,7 @@ namespace ToyEcommerceASPNET.Controllers
 					return new NotFoundObjectResult(new
 					{
 						status = "error",
-						message = "Cart has no product"
+						Message = "Cart has no product"
 					});
 				}
 
@@ -206,12 +210,61 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// PUT api/<OrderController>/5
-		[HttpPut("{id}")]
-		public async Task<IActionResult> ConfirmOrder(int id, [FromBody] string value)
+		[HttpPut("order/{id}")]
+		public async Task<IActionResult> ConfirmOrder([FromRoute] string id)
 		{
 			try
 			{
-				return null;
+				var order = _orderService.GetOrderById(id);
+
+				if (order == null)
+				{
+					return new NotFoundObjectResult(new
+					{
+						status = "error",
+						Message = "Order not found"
+					});
+				}
+
+				if (order.Status == OrderStatus.Confirmed)
+				{
+					return new BadRequestObjectResult(new
+					{
+						status = "error",
+						Message = "Order already confirmed"
+					});
+				}
+
+				order.Status = OrderStatus.Confirmed;
+
+				_orderService.UpdateOrder(id,order);
+
+				foreach (var orderItem in order.Products)
+				{
+					var currentProduct =  await _productService.GetProductById(orderItem.ProductId);
+
+					if (currentProduct == null)
+					{
+						return new BadRequestObjectResult(new { status = "error", Message = "Product not found" });
+					}
+
+					// Check if the product is still available
+					if (currentProduct.Quantity < orderItem.Quantity)
+					{
+						return  new BadRequestObjectResult(new { status = "error", Message = $"{currentProduct.Name} is out of stock" });
+					}
+
+					// Update product quantity
+					currentProduct.Quantity -= orderItem.Quantity;
+					await _productService.UpdateProductAsync(currentProduct.Id, currentProduct);
+				}
+				return new OkObjectResult(new
+				{
+					status = "success",
+					Message = "Order confirmed",
+					order = order
+
+				});
 			}
 			catch(Exception e)
 			{

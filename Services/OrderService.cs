@@ -67,7 +67,7 @@ namespace ToyEcommerceASPNET.Services
 
 		public void UpdateOrder(string id, Order orderIn)
 		{
-			_order.ReplaceOne(order => order.UserId == id, orderIn);
+			_order.ReplaceOne(order => order.Id == id, orderIn);
 		}
 
 		public void DeleteOrder(string id)

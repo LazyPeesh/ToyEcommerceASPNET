@@ -147,7 +147,7 @@ namespace ToyEcommerceASPNET.Controllers
 				 {
 
 					 status = "error",
-					 Message = "Invalid page number"
+					 Message = "User not found"
 				 });
 
 
