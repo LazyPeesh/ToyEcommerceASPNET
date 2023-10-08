@@ -79,10 +79,11 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// GET api/<CartController>/5
 		[HttpGet("cart")]
-		public async Task<IActionResult> GetCartByUSerId([FromBody] string id)
+		public async Task<IActionResult> GetCartByUSerId()
 		{
 			try
 			{
+				string id = "6514faf67e6fba152fa8b99b";
 				var cart = _cartService.GetCartByUserId(id);
 				if (cart == null)
 				{
@@ -111,27 +112,84 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// POST api/<CartController>
 		[HttpPost("cart")]
-		public async Task<IActionResult> CreateCart([FromBody] Cart cart)
+		public async Task<IActionResult> CreateCart()
 		{
 			try
 			{
 				/*	 var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
 					cart.UserId = userId;*/
+				string userId = "6514faf67e6fba152fa8b99b";
 				var cartCreate = new Cart
 				{
-					UserId = cart.UserId,
+					UserId = userId,
 					Products = new List<CartItem> { }
 
-					/*					TotalPrice = cart.TotalPrice
-					*/
 				};
 
-				_cartService.CreateCart(cart);
+				_cartService.CreateCart(cartCreate);
 
 				return new OkObjectResult(new
 				{
 					status = "success",
+					cart = cartCreate
+				});
+
+			}
+			catch (Exception e)
+			{
+				return new BadRequestObjectResult(new
+				{
+					Status = "error",
+					Message = e.Message
+				});
+			}
+
+		}
+
+		[HttpPost("cart/add")]
+		public async Task<IActionResult> AddToCart([FromBody] CartItem cartItems)
+		{
+			try
+			{
+				/*				var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+				 *				
+				*/
+
+				string id = "6514faf67e6fba152fa8b99b";
+				var cart = _cartService.GetCartByUserId(id);
+				if (cart == null)
+				{
+					cart = new Cart
+					{
+						UserId = id,
+						Products = new List<CartItem>(),
+
+					};
+				}
+
+				var existingProduct = cart.Products.FirstOrDefault(p => p.ProductId == cartItems.ProductId);
+				if (existingProduct != null)
+				{
+					existingProduct.Quantity += cartItems.Quantity;
+				}
+				else
+				{
+					cart.Products.Add(new CartItem
+					{
+						ProductId = cartItems.ProductId,
+						Quantity = cartItems.Quantity
+					});
+				}
+
+
+				_cartService.UpdateCart(id, cart);
+
+
+				return new OkObjectResult(new
+				{
+					status = "success",
+					message = "Cart updated successfully",
 					cart = cart
 				});
 
@@ -147,9 +205,10 @@ namespace ToyEcommerceASPNET.Controllers
 
 		}
 
+
 		// PUT api/<CartController>/5
 		[HttpPut("cart/update")]
-		public async Task<IActionResult> Put( string id, [FromBody] CartItem cartItems)
+		public async Task<IActionResult> Put(  [FromBody] CartItem cartItems)
 		{
 			try
 			{
@@ -157,6 +216,7 @@ namespace ToyEcommerceASPNET.Controllers
 				 *				
 				*/
 
+				string id = "6514faf67e6fba152fa8b99b";
 				var cart = _cartService.GetCartByUserId(id);
 				if (cart == null)
 				{
@@ -164,8 +224,7 @@ namespace ToyEcommerceASPNET.Controllers
 					{
 						UserId = id,
 						Products = new List<CartItem>(),
-						/*						TotalPrice = 0
-						*/
+						
 					};
 				}
 
@@ -208,10 +267,11 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// DELETE api/<CartController>/5
 		[HttpDelete("cart/deleteItem")]
-		public async Task<IActionResult> DeleteCartItems([FromBody] string id,  string productId)
+		public async Task<IActionResult> DeleteCartItems([FromBody] string productId)
 		{
 			try
 			{
+				string id = "6514faf67e6fba152fa8b99b";
 				var cart = _cartService.GetCartByUserId(id);
 				if (cart == null)
 				{
@@ -250,7 +310,7 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-				var cart = _cartService.GetCartByUserId(id);
+				var cart = _cartService.GetCartById(id);
 				if (cart == null)
 				{
 					return new NotFoundObjectResult(new
@@ -264,7 +324,6 @@ namespace ToyEcommerceASPNET.Controllers
 				{
 					status = "success",
 					message = "Cart was deleted",
-					cart = cart
 				});
 			}
 			catch (Exception e)

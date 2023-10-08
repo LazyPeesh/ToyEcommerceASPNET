@@ -51,6 +51,11 @@ namespace ToyEcommerceASPNET.Services
 			return _cart.Find(cart => cart.UserId == id).FirstOrDefault();
 		}
 
+		public Cart GetCartById(string id)
+		{
+			return _cart.Find(cart => cart.Id == id).FirstOrDefault();
+		}
+
 
 		public Cart CreateCart(Cart cart)
 		{

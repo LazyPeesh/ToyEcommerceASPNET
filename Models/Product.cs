@@ -23,7 +23,7 @@ namespace ToyEcommerceASPNET.Models
 
 		[Required(ErrorMessage = "Product quantity is required")]
 		[Range(0, int.MaxValue, ErrorMessage = "Product quantity cannot be less than 0")]
-		public int Quantity { get; set; } = 0;
+		public int? Quantity { get; set; } = 0;
 
 		public double Ratings { get; set; } = 0;
 
