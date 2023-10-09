@@ -37,7 +37,7 @@ namespace ToyEcommerceASPNET.Controllers
         }
 
         // GET api/v1/product/{id}
-        [HttpGet("/product/{id}")]
+        [HttpGet("product/{id}")]
         public async Task<IActionResult> GetProduct([FromRoute] string id)
         {
             try
@@ -45,7 +45,14 @@ namespace ToyEcommerceASPNET.Controllers
                 var product = await _productService.GetProductById(id);
 
                 if (product == null)
-                    return NotFound($"Product with Id = {id} not found");
+                {
+                    return new OkObjectResult(new
+                    {
+                        status = "error",
+                        message = $"Product with Id = {id} not found"
+                    });
+                }
+
 
                 return new OkObjectResult(new
                 {
@@ -55,7 +62,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message
@@ -63,10 +70,10 @@ namespace ToyEcommerceASPNET.Controllers
             }
         }
 
-        // GET api/v1/products/search?keyword
-        [HttpGet("/products/search")]
+        // GET api/v1/products/search?keyword={keyword}&page={page}
+        [HttpGet("products/search")]
         public async Task<IActionResult> SearchProducts(
-            [FromQuery(Name = "keyword")] string keyword,
+            [FromQuery(Name = "query")] string keyword,
             [FromQuery(Name = "page")] int page)
         {
             try
@@ -74,7 +81,7 @@ namespace ToyEcommerceASPNET.Controllers
                 var products = await _productService.SearchProductsAsync(keyword, page);
 
                 if (products == null)
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         status = "error",
                         message = $"Product with keywork = {keyword} not found"
@@ -84,7 +91,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message
@@ -92,31 +99,44 @@ namespace ToyEcommerceASPNET.Controllers
             }
         }
 
-        // GET api/v1/products/category/{category}
-        [HttpGet("/category")]
+        // GET api/v1/products/categories
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategories()
+        {
+            try
+            {
+                var categories = await _productService.GetAllCategoriesAsync();
+
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    categories
+                });
+            }
+            catch (Exception ex)
+            {
+                return new OkObjectResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
+        }
+
+        // GET api/v1/category?category={category}&page={page}
+        [HttpGet("category")]
         public async Task<IActionResult> GetProductsByCategory([FromQuery(Name = "category")] string category,
             [FromQuery(Name = "page")] int page)
         {
             try
             {
-                var products = await _productService.GetProductsByCategory(category);
+                var products = await _productService.GetProductsByCategory(category, page);
 
-                if (products.Count() == 0)
-                    return new BadRequestObjectResult(new
-                    {
-                        status = "error",
-                        message = $"Product with category = {category} not found"
-                    });
-
-                return new OkObjectResult(new
-                {
-                    status = "success",
-                    products
-                });
+                return Ok(products);
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message
@@ -124,8 +144,8 @@ namespace ToyEcommerceASPNET.Controllers
             }
         }
 
-        // POST api/v1/products
-        [HttpPost("/product")]
+        // POST api/v1/product
+        [HttpPost("product")]
         public async Task<IActionResult> CreateProduct([FromForm] Product product, IFormFileCollection uploadImages)
         {
             try
@@ -169,8 +189,8 @@ namespace ToyEcommerceASPNET.Controllers
             }
         }
 
-        // PUT api/v1/products/{id}
-        [HttpPut("/product/{id}")]
+        // PUT api/v1/product/{id}
+        [HttpPut("product/{id}")]
         public async Task<IActionResult> UpdateProduct([FromRoute] string id,
             [FromForm] UpdateProductResponse product, IFormFileCollection uploadImages)
         {
@@ -261,7 +281,7 @@ namespace ToyEcommerceASPNET.Controllers
         }
 
         // DELETE api/v1/products/{id}
-        [HttpDelete("/product/{id}")]
+        [HttpDelete("product/{id}")]
         public async Task<IActionResult> DeleteProduct([FromRoute] string id)
         {
             try

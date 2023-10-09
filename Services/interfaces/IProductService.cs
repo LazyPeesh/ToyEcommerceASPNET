@@ -5,12 +5,13 @@ namespace ToyEcommerceASPNET.Services.interfaces
 {
     public interface IProductService
     {
-		Task<Object> GetAllProductsAsync(int? queryPage);
-		Task<Product> GetProductById(string id);
-		Task<IEnumerable<Product>> GetProductsByCategory(string category);
-		Task<Object> SearchProductsAsync(string keyword, int? queryPage);
-		Task CreateProductAsync(Product product);
-		Task UpdateProductAsync(string id, Product product);
-		Task DeleteProductAsync(string id);
-	}
+        Task<Object> GetAllProductsAsync(int? queryPage);
+        Task<Object> GetAllCategoriesAsync();
+        Task<Product> GetProductById(string id);
+        Task<Object> GetProductsByCategory(string category, int page);
+        Task<Object> SearchProductsAsync(string keyword, int queryPage);
+        Task CreateProductAsync(Product product);
+        Task UpdateProductAsync(string id, Product product);
+        Task DeleteProductAsync(string id);
+    }
 }
