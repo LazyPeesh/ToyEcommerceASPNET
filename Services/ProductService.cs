@@ -57,7 +57,16 @@ public class ProductService : IProductService
 
     public async Task<Product> GetProductById(string id)
     {
-        return await _products.Find(product => product.Id == id).FirstOrDefaultAsync();
+        try
+        {
+            var product = await _products.Find(product => product.Id == id).FirstOrDefaultAsync();
+            return product;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return null;
+        }
     }
 
     public async Task<Object> GetProductsByCategory(string category, int page = 1)

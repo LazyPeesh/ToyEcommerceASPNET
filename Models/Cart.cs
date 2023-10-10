@@ -12,7 +12,7 @@ namespace ToyEcommerceASPNET.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? UserId { get; set; }
 
-        public List<CartItem>? Products { get; set; }
+        public List<CartItem>? Products { get; set; } = new List<CartItem>();
 
         [BsonIgnore]
         public decimal? TotalPrice

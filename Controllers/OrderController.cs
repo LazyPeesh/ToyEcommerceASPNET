@@ -150,7 +150,7 @@ namespace ToyEcommerceASPNET.Controllers
 			try
 			{
 				string id = "6514faf67e6fba152fa8b99b";
-				var cart = _cartService.GetCartByUserId(id);
+				var cart = _cartService.GetCartByUserId(id).Result;
 
 				if (cart == null)
 				{
