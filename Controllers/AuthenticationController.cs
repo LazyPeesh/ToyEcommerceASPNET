@@ -29,7 +29,6 @@ namespace ToyEcommerceASPNET.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LogIn([FromBody] SignInRequest request)
         {
-            Console.WriteLine("request: " + request);
             return await _authenticationService.SignIn(request);
         }
     }

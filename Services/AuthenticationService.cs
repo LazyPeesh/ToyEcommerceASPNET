@@ -160,6 +160,7 @@ namespace ToyEcommerceASPNET.Services
                 // Return a success response with user info and tokens
                 return new OkObjectResult(new
                 {
+                    Status = "success",
                     user = user,
                     Token = new
                     {
