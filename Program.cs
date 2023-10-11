@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using Amazon.Auth.AccessControlPolicy;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -54,6 +56,28 @@ namespace ToyEcommerceASPNET
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true
                 };
+            });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IsAdmin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
+
+                options.AddPolicy("IsMatchedUser", policy => policy.RequireAssertion(context =>
+                {
+                    var userIdClaim = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userIdFromRoute = context.Resource as string;
+
+                    return userIdClaim == userIdFromRoute;
+                }));
+
+                options.AddPolicy("IsAdminOrMatchUser", policy => policy.RequireAssertion(context =>
+                {
+                    var userIdClaim = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userIdFromRoute = context.Resource as string;
+                    var role = context.User.FindFirstValue(ClaimTypes.Role);
+
+                    return role == "Admin" || userIdClaim == userIdFromRoute;
+                }));
             });
 
             // Create swagger document for APIs

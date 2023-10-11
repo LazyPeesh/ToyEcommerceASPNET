@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.Security.Claims;
+using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -22,6 +24,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET: api/<CartController>
         [HttpGet("carts")]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> GetAllCarts([FromQuery] int page = 1)
         {
             try
@@ -68,7 +71,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     Status = "error",
                     Message = e.Message
@@ -78,15 +81,19 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET api/<CartController>/5
         [HttpGet("cart")]
+        [Authorize("IsAdminOrMatchUser")]
         public async Task<IActionResult> GetCartByUSerId()
         {
             try
             {
-                string id = "6514faf67e6fba152fa8b99b";
-                var cart = _cartService.GetCartByUserId(id).Result;
+                // Get the user id from the access_token
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var cart = _cartService.GetCartByUserId(userId).Result;
+
                 if (cart == null)
                 {
-                    return new NotFoundObjectResult(new
+                    return new OkObjectResult(new
                     {
                         status = "error",
                         message = "Cart not found"
@@ -101,7 +108,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     Status = "error",
                     Message = e.Message
@@ -141,6 +148,7 @@ namespace ToyEcommerceASPNET.Controllers
         }
 
         [HttpPut("cart/add")]
+        [Authorize]
         public async Task<IActionResult> AddToCart([FromBody] JsonObject request)
         {
             try
@@ -154,8 +162,9 @@ namespace ToyEcommerceASPNET.Controllers
                     });
                 }
 
-                string id = "6514faf67e6fba152fa8b99b";
-                var cartResult = await _cartService.GetCartByUserId(id);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var cartResult = await _cartService.GetCartByUserId(userId);
                 var productId = request["productId"].ToString();
                 var quantity = int.Parse(request["quantity"].ToString());
 
@@ -164,7 +173,7 @@ namespace ToyEcommerceASPNET.Controllers
                 {
                     cartResult = new Cart
                     {
-                        UserId = id,
+                        UserId = userId,
                         Products = new List<CartItem>(),
                     };
                 }
@@ -192,7 +201,7 @@ namespace ToyEcommerceASPNET.Controllers
                     cart.Products.Add(newCartItem);
                 }
 
-                _cartService.UpdateCart(id, cart);
+                _cartService.UpdateCart(userId, cart);
 
                 return new OkObjectResult(new
                 {
@@ -203,7 +212,6 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error: ", e.Message);
                 return new OkObjectResult(new
                 {
                     Status = "error",
@@ -215,16 +223,18 @@ namespace ToyEcommerceASPNET.Controllers
 
         // PUT api/<CartController>/5
         [HttpPut("cart/update")]
+        [Authorize]
         public async Task<IActionResult> Put([FromBody] JsonObject request)
         {
             try
             {
-                string id = "6514faf67e6fba152fa8b99b";
-                var cart = await _cartService.GetCartByUserId(id);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                ;
+                var cart = await _cartService.GetCartByUserId(userId);
 
                 var productId = request["productId"]?.ToString();
                 var quantity = int.Parse(request["quantity"]?.ToString() ?? "1");
-                
+
                 var existingProduct = cart.Products?.FirstOrDefault(p => p.ProductId == productId);
                 if (existingProduct == null)
                 {
@@ -234,10 +244,10 @@ namespace ToyEcommerceASPNET.Controllers
                         message = "Product not found"
                     });
                 }
-                
+
                 existingProduct.Quantity = quantity;
-                _cartService.UpdateCart(id, cart);
-                
+                _cartService.UpdateCart(userId, cart);
+
                 return new OkObjectResult(new
                 {
                     status = "success",
@@ -247,7 +257,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     Status = "error",
                     Message = e.Message
@@ -257,17 +267,18 @@ namespace ToyEcommerceASPNET.Controllers
 
         // DELETE api/<CartController>/5
         [HttpDelete("cart/deleteItem")]
+        [Authorize]
         public async Task<IActionResult> DeleteCartItems([FromBody] JsonObject request)
         {
             try
             {
-                string id = "6514faf67e6fba152fa8b99b";
-                var cart = _cartService.GetCartByUserId(id).Result;
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var cart = _cartService.GetCartByUserId(userId).Result;
                 var productId = request["productId"].ToString();
-                
+
                 if (cart == null)
                 {
-                    return new NotFoundObjectResult(new
+                    return new OkObjectResult(new
                     {
                         status = "error",
                         message = "Cart not found"
@@ -280,7 +291,7 @@ namespace ToyEcommerceASPNET.Controllers
                     cart.Products?.Remove(existingProduct);
                 }
 
-                _cartService.UpdateCart(id, cart);
+                _cartService.UpdateCart(userId, cart);
                 return new OkObjectResult(new
                 {
                     status = "success",
@@ -300,6 +311,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // DELETE api/<CartController>/5
         [HttpDelete("cart/{id}")]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> DeleteCart([FromRoute] string id)
         {
             try
@@ -307,7 +319,7 @@ namespace ToyEcommerceASPNET.Controllers
                 var cart = _cartService.GetCartById(id);
                 if (cart == null)
                 {
-                    return new NotFoundObjectResult(new
+                    return new OkObjectResult(new
                     {
                         status = "error",
                         message = "Cart not found"
@@ -323,18 +335,12 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     Status = "error",
                     Message = e.Message
                 });
             }
         }
-    }
-
-    public class AddToCartRequest
-    {
-        public string ProductId { get; set; }
-        public int Quantity { get; set; }
     }
 }

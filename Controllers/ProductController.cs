@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
 
@@ -18,7 +19,7 @@ namespace ToyEcommerceASPNET.Controllers
         }
 
         // GET: api/v1/products
-        [HttpGet("/products")]
+        [HttpGet("products")]
         public async Task<IActionResult> GetAllProducts([FromQuery(Name = "page")] int page)
         {
             try
@@ -146,6 +147,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // POST api/v1/product
         [HttpPost("product")]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> CreateProduct([FromForm] Product product, IFormFileCollection uploadImages)
         {
             try
@@ -191,6 +193,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // PUT api/v1/product/{id}
         [HttpPut("product/{id}")]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> UpdateProduct([FromRoute] string id,
             [FromForm] UpdateProductResponse product, IFormFileCollection uploadImages)
         {
@@ -282,6 +285,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // DELETE api/v1/products/{id}
         [HttpDelete("product/{id}")]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> DeleteProduct([FromRoute] string id)
         {
             try
