@@ -191,8 +191,8 @@ namespace ToyEcommerceASPNET.Services
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.IsAdmin == true ? "true" : "false")
+                new Claim(ClaimTypes.Email, user.Email.ToString()),
+                new Claim(ClaimTypes.Role, user.IsAdmin == true ? "Admin" : "User")
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
