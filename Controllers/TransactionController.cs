@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authorization;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -19,6 +20,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET: api/v1/transactions
         [HttpGet]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> GetTransactions([FromQuery(Name = "page")] int page)
         {
             try
@@ -26,11 +28,10 @@ namespace ToyEcommerceASPNET.Controllers
                 var transaction = await _transactionService.GetAllTransactionsAsync(page);
 
                 return Ok(transaction);
-
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message
@@ -40,6 +41,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET api/v1/transactions/{id}
         [HttpGet("{id}")]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
             try
@@ -47,7 +49,7 @@ namespace ToyEcommerceASPNET.Controllers
                 var transaction = await _transactionService.GetTransactionById(id);
 
                 if (transaction == null)
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         status = "error",
                         message = $"Transaction with Id = {id} not found"
@@ -60,7 +62,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message
@@ -70,6 +72,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // POST api/v1/products
         [HttpPost]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> CreateTransaction([FromBody] JsonObject request)
         {
             try
@@ -104,7 +107,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message
@@ -114,15 +117,15 @@ namespace ToyEcommerceASPNET.Controllers
 
         // PUT api/v1/transactions/{id}
         [HttpPut("{id}")]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> UpdateTransaction([FromRoute] int id, [FromForm] Transaction transaction)
         {
             try
             {
-
                 var existedTransaction = await _transactionService.GetTransactionById(id);
 
                 if (existedTransaction == null)
-                    return new BadRequestObjectResult(new
+                    return new OkObjectResult(new
                     {
                         status = "error",
                         message = $"Transaction with Id = {id} not found"
@@ -149,7 +152,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message
@@ -159,6 +162,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // DELETE api/v1/transactions/{id}
         [HttpDelete("{id}")]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> DeleteTransaction([FromRoute] int id)
         {
             try
@@ -169,17 +173,17 @@ namespace ToyEcommerceASPNET.Controllers
                 {
                     status = "success",
                     message = $"Product with Id = {id} deleted successfully"
-                });;
+                });
+                ;
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message
                 });
             }
         }
-
     }
 }
