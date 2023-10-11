@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -109,11 +110,12 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
+				var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 				var user = new User
 				{
 					FullName = fullname,
 					Email = email,
-					Password = password // Store the hashed password
+					Password = passwordHash // Store the hashed password
 				};
 
 				_userService.CreateUser(user);

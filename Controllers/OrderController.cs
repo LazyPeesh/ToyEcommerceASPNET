@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
 
@@ -145,12 +146,20 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// POST api/<OrderController>
 		[HttpPost("order")]
-		public async Task<IActionResult> CreateOrder( [FromBody] Order order)
+		public async Task<IActionResult> CreateOrder( [FromBody] JsonObject request)
 		{
 			try
 			{
+				
 				string id = "6514faf67e6fba152fa8b99b";
 				var cart = _cartService.GetCartByUserId(id).Result;
+				var shippingAddress = request["shippingAddress"]?.ToString();
+				var totalCost = decimal.Parse(request["totalCost"]?.ToString());
+
+				Console.WriteLine(shippingAddress);
+
+				var phone = request["phone"]?.ToString();
+
 
 				if (cart == null)
 				{
@@ -181,9 +190,9 @@ namespace ToyEcommerceASPNET.Controllers
 				{
 					UserId = id,
 					Products = orderItems,
-					ShippingAddress = order.ShippingAddress,
-					Phone = order.Phone,
-					TotalCost = order.TotalCost
+					ShippingAddress = shippingAddress,
+					Phone = phone,
+					TotalCost = totalCost
 				};
 
 				 _orderService.CreateOrder(newOrder);

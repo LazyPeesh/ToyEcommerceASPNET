@@ -18,7 +18,7 @@ namespace ToyEcommerceASPNET.Controllers
         }
 
         // GET: api/v1/products
-        [HttpGet("/products")]
+        [HttpGet("products")]
         public async Task<IActionResult> GetAllProducts([FromQuery(Name = "page")] int page)
         {
             try
