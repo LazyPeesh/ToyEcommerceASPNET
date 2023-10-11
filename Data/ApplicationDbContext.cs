@@ -6,7 +6,7 @@ namespace ToyEcommerceASPNET.Data
 	public class ApplicationDbContext : DbContext
 	{
 		public ApplicationDbContext(DbContextOptions options) : base(options) { }
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+/*		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Transaction>().HasData(
 				new Transaction { Id = 1, Type = "Test", Amount = 9.99, PaymentMethod = PaymentMethod.PayPal, Status = Status.Completed },
@@ -20,7 +20,7 @@ namespace ToyEcommerceASPNET.Data
 				new Transaction { Id = 9, Type = "Test", Amount = 9.99, PaymentMethod = PaymentMethod.PayPal, Status = Status.Completed },
 				new Transaction { Id = 10, Type = "Test", Amount = 9.99, PaymentMethod = PaymentMethod.PayPal, Status = Status.Completed }
 				);
-		}
+		}*/
 		public DbSet<Transaction> Transactions { get; set; }
 
 	}

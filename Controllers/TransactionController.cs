@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -69,17 +70,36 @@ namespace ToyEcommerceASPNET.Controllers
 
         // POST api/v1/products
         [HttpPost]
-        public async Task<IActionResult> CreateTransaction([FromForm] Transaction transaction)
+        public async Task<IActionResult> CreateTransaction([FromBody] JsonObject request)
         {
             try
             {
-                await _transactionService.CreateTransactionAsync(transaction);
+                if (request == null)
+                {
+                    return new OkObjectResult(new
+                    {
+                        status = "error",
+                        message = "Invalid request"
+                    });
+                }
+
+                Transaction newTransaction = new Transaction()
+                {
+                    Type = request["Type"].ToString(),
+                    Amount = double.Parse(request["Amount"].ToString()),
+                    PaymentMethod = request["PaymentMethod"].ToString(),
+                    Status = request["Status"].ToString(),
+                    OrderId = request["OrderId"].ToString(),
+                };
+
+
+                await _transactionService.CreateTransactionAsync(newTransaction);
 
                 return new OkObjectResult(new
                 {
                     Status = "success",
-                    message = $"Product created successfully",
-                    transaction
+                    message = $"Transaction created successfully",
+                    newTransaction
                 });
             }
             catch (Exception ex)
