@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authorization;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
 
@@ -8,283 +9,278 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET.Controllers
 {
-	[Route("api/v1")]
-	[ApiController]
-	public class OrderController : ControllerBase
-	{
-		private readonly IOrderService _orderService;
-		private readonly ICartService _cartService;
-		private readonly IProductService _productService;
+    [Route("api/v1")]
+    [ApiController]
+    public class OrderController : ControllerBase
+    {
+        private readonly IOrderService _orderService;
+        private readonly ICartService _cartService;
+        private readonly IProductService _productService;
 
-		public OrderController(IOrderService orderService, ICartService cartService,IProductService productService)
-		{
-			_orderService = orderService;
-			_cartService = cartService;
-			_productService = productService;
-		}
+        public OrderController(IOrderService orderService, ICartService cartService, IProductService productService)
+        {
+            _orderService = orderService;
+            _cartService = cartService;
+            _productService = productService;
+        }
 
-		// GET: api/<OrderController>
-		[HttpGet("orders")]
-		public async Task<IActionResult> GetAllOrders([FromQuery] int page = 1)
-		{
-			try
-			{
-				// Adjust page size as needed
-				int pageSize = 10;
+        // GET: api/<OrderController>
+        [HttpGet("orders")]
+        [Authorize("IsAdmin")]
+        public async Task<IActionResult> GetAllOrders([FromQuery] int page = 1)
+        {
+            try
+            {
+                // Adjust page size as needed
+                int pageSize = 10;
 
-				// Count total users
-				long totalOrders = await _orderService.CountOrdersAsync();
+                // Count total users
+                long totalOrders = await _orderService.CountOrdersAsync();
 
-				// Calculate total pages
-				int totalPages = (int)Math.Ceiling((double)totalOrders / pageSize);
+                // Calculate total pages
+                int totalPages = (int)Math.Ceiling((double)totalOrders / pageSize);
 
-				if (page < 1 || page > totalPages)
-				{
-					return new NotFoundObjectResult(new
-					{
-						status = "error",
-						Message = "Invalid page"
-					});
-				}
+                if (page < 1 || page > totalPages)
+                {
+                    return new NotFoundObjectResult(new
+                    {
+                        status = "error",
+                        Message = "Invalid page"
+                    });
+                }
 
-				// Get users for the specified page
-				var orders = _orderService.GetOrders(page, pageSize);
+                // Get users for the specified page
+                var orders = _orderService.GetOrders(page, pageSize);
 
-				if (orders == null)
-				{
-					return new OkObjectResult(new
-					{
-						status = "success",
-						order = Enumerable.Empty<Order>(),
-						totalPage = 0,
-						totalLength = 0
-					});
-				}
+                if (orders == null)
+                {
+                    return new OkObjectResult(new
+                    {
+                        status = "success",
+                        order = Enumerable.Empty<Order>(),
+                        totalPage = 0,
+                        totalLength = 0
+                    });
+                }
 
-				return new OkObjectResult(new
-				{
-					status = "success",
-					order = orders,
-					totalPage = totalPages,
-					totalLength = totalOrders
-				});
-			}
-			catch (Exception e)
-			{
-				return new BadRequestObjectResult(new
-				{
-					status = "error",
-					Message = e.Message
-				});
-			}
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    order = orders,
+                    totalPage = totalPages,
+                    totalLength = totalOrders
+                });
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new
+                {
+                    status = "error",
+                    Message = e.Message
+                });
+            }
+        }
 
-		}
+        [HttpGet("order/{id}")]
+        [Authorize("IsAdminOrMatchUser")]
+        public async Task<IActionResult> GetOrderById([FromRoute] string id)
+        {
+            try
+            {
+                var order = _orderService.GetOrderById(id);
 
-		[HttpGet("order/{id}")]
-		public async Task<IActionResult> GetOrderById([FromRoute] string id)
-		{
-			try
-			{
-				var order = _orderService.GetOrderById(id);
+                if (order == null)
+                {
+                    return new NotFoundObjectResult(new
+                    {
+                        status = "error",
+                        Message = "Order not found"
+                    });
+                }
 
-				if (order == null)
-				{
-					return new NotFoundObjectResult(new
-					{
-						status = "error",
-						Message = "Order not found"
-					});
-				}
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    order = order
+                });
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    Message = e.Message
+                });
+            }
+        }
 
-				return new OkObjectResult(new
-				{
-					status = "success",
-					order = order
-				});
-			}catch (Exception e)
-			{
-				return new BadRequestObjectResult(new
-				{
-					status = "error",
-					Message = e.Message
-				});
-			}
-		}
+        // GET api/<OrderController>/5
+        [HttpGet("orders/user")]
+        [Authorize]
+        public async Task<IActionResult> GetOrderByUSerId()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var order = _orderService.GetOrderByUserId(userId);
 
-		// GET api/<OrderController>/5
-		[HttpGet("orders/user")]
-		public async Task<IActionResult> GetOrderByUSerId()
-		{
-			try
-			{
-				string id = "6514faf67e6fba152fa8b99b";
-				var order = _orderService.GetOrderByUserId(id);
-				if (order == null)
-				{
-					return new NotFoundObjectResult(new
-					{
-						status = "error",
-						Message = "Order not found"
-					});
-				}
+                if (order == null)
+                {
+                    return new OkObjectResult(new
+                    {
+                        status = "error",
+                        Message = "Order not found"
+                    });
+                }
 
-				return new OkObjectResult(new
-				{
-					status = "success",
-					order = order
-				});
-			}
-			catch (Exception e)
-			{
-				return new BadRequestObjectResult(new
-				{
-					status = "error",
-					Message = e.Message
-				});
-			}
-		}
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    order = order
+                });
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new
+                {
+                    status = "error",
+                    Message = e.Message
+                });
+            }
+        }
 
-		// POST api/<OrderController>
-		[HttpPost("order")]
-		public async Task<IActionResult> CreateOrder( [FromBody] JsonObject request)
-		{
-			try
-			{
-				
-				string id = "6514faf67e6fba152fa8b99b";
-				var cart = _cartService.GetCartByUserId(id).Result;
-				var shippingAddress = request["shippingAddress"]?.ToString();
-				var totalCost = decimal.Parse(request["totalCost"]?.ToString());
+        // POST api/<OrderController>
+        [HttpPost("order")]
+        [Authorize("IsMatchedUser")]
+        public async Task<IActionResult> CreateOrder([FromBody] JsonObject request)
+        {
+            try
+            {
+                string id = "6514faf67e6fba152fa8b99b";
+                var cart = _cartService.GetCartByUserId(id).Result;
+                var shippingAddress = request["shippingAddress"]?.ToString();
+                var totalCost = decimal.Parse(request["totalCost"]?.ToString());
 
-				Console.WriteLine(shippingAddress);
+                var phone = request["phone"]?.ToString();
 
-				var phone = request["phone"]?.ToString();
+                if (cart == null)
+                {
+                    return new NotFoundObjectResult(new
+                    {
+                        status = "error",
+                        Message = "cart not found"
+                    });
+                }
 
+                // Check if cart.Products is not null before accessing it
+                var orderItems = cart.Products?.Select(cartItem => new OrderItem
+                {
+                    ProductId = cartItem.ProductId,
+                    Quantity = cartItem.Quantity
+                }).ToList();
 
-				if (cart == null)
-				{
-					return new NotFoundObjectResult(new
-					{
-						status = "error",
-						Message = "cart not found"
-					});
-				}
+                if (orderItems == null)
+                {
+                    return new OkObjectResult(new
+                    {
+                        status = "error",
+                        Message = "Cart has no product"
+                    });
+                }
 
-				// Check if cart.Products is not null before accessing it
-				var orderItems = cart.Products?.Select(cartItem => new OrderItem
-				{
-					ProductId = cartItem.ProductId,
-					Quantity = cartItem.Quantity
-				}).ToList();
+                var newOrder = new Order
+                {
+                    UserId = id,
+                    Products = orderItems,
+                    ShippingAddress = shippingAddress,
+                    Phone = phone,
+                    TotalCost = totalCost
+                };
 
-				if (orderItems == null)
-				{
-					return new NotFoundObjectResult(new
-					{
-						status = "error",
-						Message = "Cart has no product"
-					});
-				}
+                _orderService.CreateOrder(newOrder);
 
-				var newOrder = new Order
-				{
-					UserId = id,
-					Products = orderItems,
-					ShippingAddress = shippingAddress,
-					Phone = phone,
-					TotalCost = totalCost
-				};
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    order = newOrder
+                });
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new
+                {
+                    status = "error",
+                    Message = e.Message
+                });
+            }
+        }
 
-				 _orderService.CreateOrder(newOrder);
+        // PUT api/<OrderController>/5
+        [HttpPut("order/{id}")]
+        public async Task<IActionResult> ConfirmOrder([FromRoute] string id)
+        {
+            try
+            {
+                var order = _orderService.GetOrderById(id);
 
-				//empty user cart
-				//_cartService.ClearCartProducts(cart);
+                if (order == null)
+                {
+                    return new NotFoundObjectResult(new
+                    {
+                        status = "error",
+                        Message = "Order not found"
+                    });
+                }
 
-				return new OkObjectResult(new
-				{
-					status = "success",
-					order = newOrder
-				});
+                if (order.Status == OrderStatus.Confirmed)
+                {
+                    return new BadRequestObjectResult(new
+                    {
+                        status = "error",
+                        Message = "Order already confirmed"
+                    });
+                }
 
+                order.Status = OrderStatus.Confirmed;
 
-			}
-			catch (Exception e)
-			{
-				return new BadRequestObjectResult(new
-				{
-					status = "error",
-					Message = e.Message
-				});
-			}
-		}
+                _orderService.UpdateOrder(id, order);
 
-		// PUT api/<OrderController>/5
-		[HttpPut("order/{id}")]
-		public async Task<IActionResult> ConfirmOrder([FromRoute] string id)
-		{
-			try
-			{
-				var order = _orderService.GetOrderById(id);
+                foreach (var orderItem in order.Products)
+                {
+                    var currentProduct = await _productService.GetProductById(orderItem.ProductId);
 
-				if (order == null)
-				{
-					return new NotFoundObjectResult(new
-					{
-						status = "error",
-						Message = "Order not found"
-					});
-				}
+                    if (currentProduct == null)
+                    {
+                        return new BadRequestObjectResult(new { status = "error", Message = "Product not found" });
+                    }
 
-				if (order.Status == OrderStatus.Confirmed)
-				{
-					return new BadRequestObjectResult(new
-					{
-						status = "error",
-						Message = "Order already confirmed"
-					});
-				}
+                    // Check if the product is still available
+                    if (currentProduct.Quantity < orderItem.Quantity)
+                    {
+                        return new BadRequestObjectResult(new
+                            { status = "error", Message = $"{currentProduct.Name} is out of stock" });
+                    }
 
-				order.Status = OrderStatus.Confirmed;
+                    // Update product quantity
+                    currentProduct.Quantity -= orderItem.Quantity;
+                    await _productService.UpdateProductAsync(currentProduct.Id, currentProduct);
+                }
 
-				_orderService.UpdateOrder(id,order);
-
-				foreach (var orderItem in order.Products)
-				{
-					var currentProduct =  await _productService.GetProductById(orderItem.ProductId);
-
-					if (currentProduct == null)
-					{
-						return new BadRequestObjectResult(new { status = "error", Message = "Product not found" });
-					}
-
-					// Check if the product is still available
-					if (currentProduct.Quantity < orderItem.Quantity)
-					{
-						return  new BadRequestObjectResult(new { status = "error", Message = $"{currentProduct.Name} is out of stock" });
-					}
-
-					// Update product quantity
-					currentProduct.Quantity -= orderItem.Quantity;
-					await _productService.UpdateProductAsync(currentProduct.Id, currentProduct);
-				}
-				return new OkObjectResult(new
-				{
-					status = "success",
-					Message = "Order confirmed",
-					order = order
-
-				});
-			}
-			catch(Exception e)
-			{
-				return new BadRequestObjectResult(new
-				{
-					status = "error",
-					Message = e.Message
-				});
-			}
-		}
-
-	
-	}
+                return new OkObjectResult(new
+                {
+                    status = "success",
+                    Message = "Order confirmed",
+                    order = order
+                });
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = "error",
+                    Message = e.Message
+                });
+            }
+        }
+    }
 }
