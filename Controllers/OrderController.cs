@@ -191,6 +191,7 @@ namespace ToyEcommerceASPNET.Controllers
                 var newOrder = new Order
                 {
                     UserId = id,
+                    Status = "pending", // "Pending", "Confirmed", "Shipping", "Delivered
                     Products = orderItems,
                     ShippingAddress = shippingAddress,
                     Phone = phone,
@@ -232,7 +233,7 @@ namespace ToyEcommerceASPNET.Controllers
                     });
                 }
 
-                if (order.Status == OrderStatus.Confirmed)
+                if (order.Status == "confirmed")
                 {
                     return new BadRequestObjectResult(new
                     {
@@ -241,9 +242,8 @@ namespace ToyEcommerceASPNET.Controllers
                     });
                 }
 
-                order.Status = OrderStatus.Confirmed;
+                order.Status = "confirmed";
 
-                _orderService.UpdateOrder(id, order);
 
                 foreach (var orderItem in order.Products)
                 {
@@ -265,8 +265,9 @@ namespace ToyEcommerceASPNET.Controllers
                     currentProduct.Quantity -= orderItem.Quantity;
                     await _productService.UpdateProductAsync(currentProduct.Id, currentProduct);
                 }
+				_orderService.UpdateOrder(id, order);
 
-                return new OkObjectResult(new
+				return new OkObjectResult(new
                 {
                     status = "success",
                     Message = "Order confirmed",

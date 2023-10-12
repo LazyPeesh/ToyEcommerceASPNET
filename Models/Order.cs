@@ -16,7 +16,9 @@ namespace ToyEcommerceASPNET.Models
 
 		public List<OrderItem>? Products { get; set; }
 
-		public OrderStatus? Status { get; set; } = OrderStatus.Pending;
+		[EnumDataType(typeof(OrderStatus))]
+
+		public string? Status { get; set; } 
 
 		public decimal? TotalCost { get; set; } = 0.0m;
 

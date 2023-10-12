@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using System.Text.Json.Nodes;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
 
@@ -8,7 +9,7 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET.Controllers
 {
-	[Route("api/v1/user")]
+	[Route("api/v1")]
 	[ApiController]
 	public class UserController : ControllerBase
 	{
@@ -19,7 +20,7 @@ namespace ToyEcommerceASPNET.Controllers
 			_userService = userService;
 		}
 		// GET: api/<UserController>
-		[HttpGet]
+		[HttpGet("users")]
 		public async Task<IActionResult> GetUsers([FromQuery] int page = 1)
 		{
 			try
@@ -75,7 +76,7 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// GET api/<UserController>/5
-		[HttpGet("{id}")]
+		[HttpGet("user/{id}")]
 		public async Task<IActionResult> GetUserById( [FromRoute] string id)
 		{
 			try
@@ -105,7 +106,7 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// POST api/<UserController>
-		[HttpPost]
+		[HttpPost("user")]
 		public async Task<IActionResult> Post(string fullname, string email, string password)
 		{
 			try
@@ -137,8 +138,8 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// PUT api/<UserController>/5
-		[HttpPut("{id}")]
-		public async Task<IActionResult> Put([FromRoute] string id, [FromBody] User user)
+		[HttpPut("user/{id}")]
+		public async Task<IActionResult> Put([FromRoute] string id, [FromBody] JsonObject request)
 		{
 			try
 			{
@@ -152,13 +153,21 @@ namespace ToyEcommerceASPNET.Controllers
 					 Message = "User not found"
 				 });
 
+				var fullName = request["fullName"].ToString();
+				var email = request["email"].ToString();
+				var isAdmin = ((bool)request["isAdmin"]);
 
-				_userService.UpdateUser(id, user);
+				existingUser.Email = email;
+				existingUser.FullName = fullName;
+				existingUser.IsAdmin = isAdmin;
+
+
+				_userService.UpdateUser(id, existingUser);
 				return new ObjectResult(new
 				{
 					status = "success",
 					message = "User was updated",
-					user = user
+					user = existingUser
 				});
 			}
 			catch(Exception e)
@@ -173,7 +182,7 @@ namespace ToyEcommerceASPNET.Controllers
 		}
 
 		// DELETE api/<UserController>/5
-		[HttpDelete("{id}")]
+		[HttpDelete("user/{id}")]
 		public async Task<IActionResult> Delete([FromRoute] string id)
 		{
 			try
