@@ -31,6 +31,6 @@ namespace ToyEcommerceASPNET.Models
 		public bool? IsAdmin { get; set; } = false;
 
 		[BsonIgnore]
-		public Cart? Cart { get; set; }
+		public Cart? Cart { get; set; } = new Cart();
 	}
 }

@@ -81,7 +81,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET api/<CartController>/5
         [HttpGet("cart")]
-        [Authorize("IsAdminOrMatchUser")]
+        [Authorize]
         public async Task<IActionResult> GetCartByUSerId()
         {
             try
