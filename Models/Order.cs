@@ -14,7 +14,7 @@ namespace ToyEcommerceASPNET.Models
 		[BsonRepresentation(BsonType.ObjectId)]
 		public string? UserId { get; set; }
 
-		public List<OrderItem>? Products { get; set; }
+		public List<OrderItem>? Products { get; set; } = new List<OrderItem>();
 
 		[EnumDataType(typeof(OrderStatus))]
 

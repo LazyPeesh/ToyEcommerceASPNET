@@ -275,7 +275,7 @@ namespace ToyEcommerceASPNET.Controllers
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult(new
+                return new OkObjectResult(new
                 {
                     status = "error",
                     message = ex.Message

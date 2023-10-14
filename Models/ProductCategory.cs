@@ -2,11 +2,6 @@
 {
 	public enum ProductCategory
 	{
-		Puzzles,
-		Sensory,
-		Food,
-		RideOn,
-		Building,
-		Others
+		Contemporary
 	}
 }
