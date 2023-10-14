@@ -9,70 +9,74 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET.Services
 {
-	public class OrderService : IOrderService
-	{
-		private readonly IMongoCollection<Order> _order;
+    public class OrderService : IOrderService
+    {
+        private readonly IMongoCollection<Order> _order;
 
-		public OrderService(IOptions<DatabaseSettings> databaseSettings)
-		{
-			var mongoClient = new MongoClient(databaseSettings.Value.ConnectionString);
+        public OrderService(IOptions<DatabaseSettings> databaseSettings)
+        {
+            var mongoClient = new MongoClient(databaseSettings.Value.ConnectionString);
 
-			var mongoDatabase = mongoClient.GetDatabase(
-				databaseSettings.Value.DatabaseName);
+            var mongoDatabase = mongoClient.GetDatabase(
+                databaseSettings.Value.DatabaseName);
 
-			_order = mongoDatabase.GetCollection<Order>(
-				databaseSettings.Value.OrderCollectionName);
-		}
+            _order = mongoDatabase.GetCollection<Order>(
+                databaseSettings.Value.OrderCollectionName);
+        }
 
-		public List<Order> GetAllOrders()
-		{
-			return _order.Find(order => true).ToList();
+        public List<Order> GetAllOrders()
+        {
+            return _order.Find(order => true).ToList();
+        }
 
-		}
+        public Task<List<Order>> GetOrders(int page, int pageSize)
+        {
+            return _order.Find(u => true)
+                .Skip((page - 1) * pageSize)
+                .Limit(pageSize)
+                .ToListAsync();
+        }
 
-		public Task<List<Order>> GetOrders(int page, int pageSize)
-		{
+        public Task<List<Order>> GetUserOrders(int page, int pageSize, string userId)
+        {
+            return _order.Find(u => u.UserId == userId)
+                .Skip((page - 1) * pageSize)
+                .Limit(pageSize)
+                .ToListAsync();
+        }
 
-			return _order.Find(u => true)
-					.Skip((page - 1) * pageSize)
-					.Limit(pageSize)
-					.ToListAsync();
+        public Order GetOrderById(string id)
+        {
+            return _order.Find(order => order.Id == id).FirstOrDefault();
+        }
 
-		}
-
-		public Order GetOrderById(string id)
-		{
-			return _order.Find(order => order.Id == id).FirstOrDefault();
-		}
-
-		public async Task<long> CountOrdersAsync()
-		{
-			// Count documents in the "users" collection
-			return await _order.CountDocumentsAsync(user => true);
-		}
-
-
-		public Order GetOrderByUserId(string id)
-		{
-			return _order.Find(order => order.UserId == id).FirstOrDefault();
-		}
+        public async Task<long> CountOrdersAsync()
+        {
+            // Count documents in the "users" collection
+            return await _order.CountDocumentsAsync(user => true);
+        }
 
 
-		public Order CreateOrder(Order order)
-		{
-			
-			_order.InsertOne(order);
-			return order;
-		}
+        public Order GetOrderByUserId(string id)
+        {
+            return _order.Find(order => order.UserId == id).FirstOrDefault();
+        }
 
-		public void UpdateOrder(string id, Order orderIn)
-		{
-			_order.ReplaceOne(order => order.Id == id, orderIn);
-		}
 
-		public void DeleteOrder(string id)
-		{
-			_order.DeleteOne(order => order.Id == id);
-		}
-	}
+        public Order CreateOrder(Order order)
+        {
+            _order.InsertOne(order);
+            return order;
+        }
+
+        public void UpdateOrder(string id, Order orderIn)
+        {
+            _order.ReplaceOne(order => order.Id == id, orderIn);
+        }
+
+        public void DeleteOrder(string id)
+        {
+            _order.DeleteOne(order => order.Id == id);
+        }
+    }
 }

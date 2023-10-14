@@ -81,7 +81,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET api/<CartController>/5
         [HttpGet("cart")]
-        [Authorize("IsAdminOrMatchUser")]
+        [Authorize]
         public async Task<IActionResult> GetCartByUSerId()
         {
             try
@@ -93,10 +93,20 @@ namespace ToyEcommerceASPNET.Controllers
 
                 if (cart == null)
                 {
+                    _cartService.CreateCart(new Cart()
+                    {
+                        UserId = userId,
+                        Products = new List<CartItem> { }
+                    });
+
                     return new OkObjectResult(new
                     {
-                        status = "error",
-                        message = "Cart not found"
+                        status = "success",
+                        cart = new Cart
+                        {
+                            UserId = userId,
+                            Products = new List<CartItem> { }
+                        }
                     });
                 }
 
@@ -198,7 +208,7 @@ namespace ToyEcommerceASPNET.Controllers
                         Product = addedProduct
                     };
 
-                    cart.Products.Add(newCartItem);
+                    cart?.Products?.Add(newCartItem);
                 }
 
                 _cartService.UpdateCart(userId, cart);

@@ -26,11 +26,13 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET: api/<OrderController>
         [HttpGet("orders")]
-        [Authorize("IsAdmin")]
+        [Authorize]
         public async Task<IActionResult> GetAllOrders([FromQuery] int page = 1)
         {
             try
             {
+                var role = User.FindFirstValue(ClaimTypes.Role);
+
                 // Adjust page size as needed
                 int pageSize = 10;
 
@@ -42,7 +44,7 @@ namespace ToyEcommerceASPNET.Controllers
 
                 if (page < 1 || page > totalPages)
                 {
-                    return new NotFoundObjectResult(new
+                    return new OkObjectResult(new
                     {
                         status = "error",
                         Message = "Invalid page"
@@ -50,7 +52,16 @@ namespace ToyEcommerceASPNET.Controllers
                 }
 
                 // Get users for the specified page
-                var orders = _orderService.GetOrders(page, pageSize);
+                var orders = new List<Order>();
+                if (role == "Admin")
+                {
+                    orders = await _orderService.GetOrders(page, pageSize);
+                }
+                else
+                {
+                    orders = await _orderService.GetUserOrders(page, pageSize,
+                        User.FindFirstValue(ClaimTypes.NameIdentifier));
+                }
 
                 if (orders == null)
                 {
@@ -91,7 +102,7 @@ namespace ToyEcommerceASPNET.Controllers
 
                 if (order == null)
                 {
-                    return new NotFoundObjectResult(new
+                    return new OkObjectResult(new
                     {
                         status = "error",
                         Message = "Order not found"
@@ -128,8 +139,10 @@ namespace ToyEcommerceASPNET.Controllers
                 {
                     return new OkObjectResult(new
                     {
-                        status = "error",
-                        Message = "Order not found"
+                        status = "success",
+                        orders = new List<Order>(),
+                        totalPage = 0,
+                        totalLength = 0
                     });
                 }
 
@@ -265,9 +278,10 @@ namespace ToyEcommerceASPNET.Controllers
                     currentProduct.Quantity -= orderItem.Quantity;
                     await _productService.UpdateProductAsync(currentProduct.Id, currentProduct);
                 }
-				_orderService.UpdateOrder(id, order);
 
-				return new OkObjectResult(new
+                _orderService.UpdateOrder(id, order);
+
+                return new OkObjectResult(new
                 {
                     status = "success",
                     Message = "Order confirmed",

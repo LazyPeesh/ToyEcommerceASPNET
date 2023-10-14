@@ -60,6 +60,7 @@ namespace ToyEcommerceASPNET
 
             builder.Services.AddAuthorization(options =>
             {
+                options.AddPolicy("IsAuthenticated", policy => policy.RequireAuthenticatedUser());
                 options.AddPolicy("IsAdmin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
 
                 options.AddPolicy("IsMatchedUser", policy => policy.RequireAssertion(context =>
@@ -91,7 +92,15 @@ namespace ToyEcommerceASPNET
             });
 
             // Add cors
-            builder.Services.AddCors();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("MyCorsPolicy", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
 
             // Dependency Injection of DbContext Class
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -112,16 +121,10 @@ namespace ToyEcommerceASPNET
 
             app.UseRouting();
 
+            app.UseCors("MyCorsPolicy");
+
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseCors(builderCors =>
-            {
-                builderCors
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-            });
 
             app.MapControllerRoute(
                 name: "default",

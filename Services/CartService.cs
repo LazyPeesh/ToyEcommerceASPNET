@@ -74,6 +74,7 @@ namespace ToyEcommerceASPNET.Services
             try
             {
                 await _cart.ReplaceOneAsync(cart => cart.UserId == id, cartIn);
+                Console.WriteLine("Cart updated");
             }
             catch (Exception e)
             {
