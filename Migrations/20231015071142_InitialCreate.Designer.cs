@@ -12,8 +12,8 @@ using ToyEcommerceASPNET.Data;
 namespace ToyEcommerceASPNET.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231011034654_initialCreate")]
-    partial class initialCreate
+    [Migration("20231015071142_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
