@@ -99,7 +99,6 @@ public class ProductService : IProductService
         {
             filter =
                 Builders<Product>.Filter.Regex("Name", new MongoDB.Bson.BsonRegularExpression(keyword, "i")) |
-                Builders<Product>.Filter.Regex("Description", new MongoDB.Bson.BsonRegularExpression(keyword, "i")) |
                 Builders<Product>.Filter.Regex("Category", new MongoDB.Bson.BsonRegularExpression(keyword, "i"));
         }
 
