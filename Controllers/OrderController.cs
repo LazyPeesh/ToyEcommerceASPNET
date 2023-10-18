@@ -164,7 +164,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // POST api/<OrderController>
         [HttpPost("order")]
-        [Authorize("IsMatchedUser")]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] JsonObject request)
         {
             try
@@ -184,12 +184,15 @@ namespace ToyEcommerceASPNET.Controllers
                         Message = "cart not found"
                     });
                 }
+                var products = cart.Products;
 
                 // Check if cart.Products is not null before accessing it
                 var orderItems = cart.Products?.Select(cartItem => new OrderItem
                 {
                     ProductId = cartItem.ProductId,
-                    Quantity = cartItem.Quantity
+                    Quantity = cartItem.Quantity,
+                    Product = cartItem.Product
+
                 }).ToList();
 
                 if (orderItems == null)
