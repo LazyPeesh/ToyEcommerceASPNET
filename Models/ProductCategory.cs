@@ -2,6 +2,10 @@
 {
 	public enum ProductCategory
 	{
-		Contemporary
+		Contemporary,
+		Horror,
+		Romance,
+		Classic,
+		ShortStory
 	}
 }
