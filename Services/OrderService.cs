@@ -57,9 +57,9 @@ namespace ToyEcommerceASPNET.Services
         }
 
 
-        public Order GetOrderByUserId(string id)
+        public List<Order> GetOrderByUserId(string id)
         {
-            return _order.Find(order => order.UserId == id).FirstOrDefault();
+            return _order.Find(order => order.UserId == id).ToList();
         }
 
 

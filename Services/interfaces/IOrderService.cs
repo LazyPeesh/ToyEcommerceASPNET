@@ -7,7 +7,7 @@ namespace ToyEcommerceASPNET.Services.interfaces
         List<Order> GetAllOrders();
         Task<List<Order>> GetOrders(int page, int pageSize);
         Task<List<Order>> GetUserOrders(int page, int pageSize, string userId);
-        Order GetOrderByUserId(string id);
+        List<Order> GetOrderByUserId(string id);
         Task<long> CountOrdersAsync();
         Order CreateOrder(Order order);
         Order GetOrderById(string id);
