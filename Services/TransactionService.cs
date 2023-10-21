@@ -24,8 +24,8 @@ namespace ToyEcommerceASPNET.Services
 			{
 				status = "success",
 				transactions = transactions.Skip((page - 1) * perPage).Take(perPage),
-				totalPage = total,
-                totalLength = page
+				totalPage = Math.Ceiling((double)total / perPage),
+				totalLength = total
 			};
 
 			return data;
