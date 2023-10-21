@@ -1,0 +1,8 @@
+SELECT TOP (1000) [Id]
+      ,[Type]
+      ,[Amount]
+      ,[PaymentMethod]
+      ,[Timestamp]
+      ,[Status]
+      ,[OrderId]
+  FROM [dbo].[Transactions]

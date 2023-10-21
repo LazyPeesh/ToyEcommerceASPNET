@@ -168,7 +168,6 @@ namespace ToyEcommerceASPNET.Controllers
 				// Update images file path for Product
 				if (uploadImages != null)
 				{
-					Console.WriteLine("in size");
 					List<string> images = await UploadImages(uploadImages, newProduct.Id);
 					newProduct.Images = images; // Add images path
 					await _productService.UpdateProductAsync(newProduct.Id, newProduct);
@@ -232,8 +231,7 @@ namespace ToyEcommerceASPNET.Controllers
 					// Filter images that need to be remove
 					if (product.KeptImages.Count() != 0)
 					{
-						imagesToDelete = existingProduct.Images.Where(image => !product.KeptImages.Contains(image))
-							.ToList();
+						imagesToDelete = existingProduct.Images.Where(image => !product.KeptImages.Contains(image)).ToList();
 					}
 					else
 					{
@@ -258,8 +256,7 @@ namespace ToyEcommerceASPNET.Controllers
 				}
 				else
 				{
-					var imagesToDelete = existingProduct.Images.Where(image => !product.KeptImages.Contains(image))
-						.ToList();
+					var imagesToDelete = existingProduct.Images.Where(image => !product.KeptImages.Contains(image)).ToList();
 					await RemoveImages(imagesToDelete);
 					updateProduct.Images = product.KeptImages;
 				}
