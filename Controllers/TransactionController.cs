@@ -72,7 +72,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // POST api/v1/products
         [HttpPost]
-        [Authorize("IsAdmin")]
+        [Authorize]
         public async Task<IActionResult> CreateTransaction([FromBody] JsonObject request)
         {
             try
