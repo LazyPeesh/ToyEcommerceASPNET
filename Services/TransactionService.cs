@@ -17,7 +17,7 @@ namespace ToyEcommerceASPNET.Services
 			var transactions = await _context.Transactions.ToListAsync();
 
 			int page = queryPage.GetValueOrDefault(1) <= 0 ? 1 : queryPage.GetValueOrDefault(1);
-			int perPage = 5;    // number of items per page
+			int perPage = 50;    // number of items per page
 			var total = transactions.Count();
 
 			var data = new
@@ -47,6 +47,36 @@ namespace ToyEcommerceASPNET.Services
 		public async Task UpdateTransactionAsync(int id, Transaction transaction)
 		{
 			Transaction tr = await _context.Transactions.FindAsync(id);
+
+			_context.Entry(tr).State = EntityState.Detached;
+			_context.Attach(transaction);
+			try
+			{
+				_context.Transactions.Update(transaction);
+				await _context.SaveChangesAsync();
+			}
+			catch (DbUpdateConcurrencyException)
+			{
+				if (TransactionExists(transaction.Id))
+					throw;
+			}
+		}
+
+		public async Task ChangeTransactionStatusAsync(string orderId, string status)
+		{
+
+			Transaction tr = await _context.Transactions.FirstOrDefaultAsync(t => t.OrderId == orderId);
+
+			Transaction transaction = new Transaction()
+			{
+				Id = tr.Id,
+				Type = tr.Type,
+				Amount = tr.Amount,
+				PaymentMethod = tr.PaymentMethod,
+				Timestamp = DateTime.Now,
+				Status = status,
+				OrderId = tr.OrderId
+			};
 
 			_context.Entry(tr).State = EntityState.Detached;
 			_context.Attach(transaction);

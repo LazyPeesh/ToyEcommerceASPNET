@@ -8,6 +8,7 @@ namespace ToyEcommerceASPNET.Services.interfaces
 		Task<Transaction> GetTransactionById(int id);
 		Task<Transaction> CreateTransactionAsync(Transaction transaction);
 		Task UpdateTransactionAsync(int id, Transaction transaction);
+		Task ChangeTransactionStatusAsync(string id, string status);
 		Task DeleteTransactionAsync(int id);
 	}
 }

@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Authorization;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
+using ToyEcommerceASPNET.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,13 +17,15 @@ namespace ToyEcommerceASPNET.Controllers
         private readonly IOrderService _orderService;
         private readonly ICartService _cartService;
         private readonly IProductService _productService;
+        private readonly ITransactionService _transactionService;
 
-        public OrderController(IOrderService orderService, ICartService cartService, IProductService productService)
+		public OrderController(IOrderService orderService, ICartService cartService, IProductService productService, ITransactionService transactionService)
         {
             _orderService = orderService;
             _cartService = cartService;
             _productService = productService;
-        }
+			_transactionService = transactionService;
+		}
 
         // GET: api/<OrderController>
         [HttpGet("orders")]
@@ -34,7 +37,7 @@ namespace ToyEcommerceASPNET.Controllers
                 var role = User.FindFirstValue(ClaimTypes.Role);
 
                 // Adjust page size as needed
-                int pageSize = 10;
+                int pageSize = 50;
 
                 // Count total users
                 long totalOrders = await _orderService.CountOrdersAsync();
@@ -282,9 +285,12 @@ namespace ToyEcommerceASPNET.Controllers
                     await _productService.UpdateProductAsync(currentProduct.Id, currentProduct);
                 }
 
+                await _transactionService.ChangeTransactionStatusAsync(id, order.Status);
                 _orderService.UpdateOrder(id, order);
 
-                return new OkObjectResult(new
+
+
+				return new OkObjectResult(new
                 {
                     status = "success",
                     Message = "Order confirmed",
