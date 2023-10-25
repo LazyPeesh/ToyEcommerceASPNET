@@ -219,6 +219,9 @@ namespace ToyEcommerceASPNET.Controllers
 
                 _orderService.CreateOrder(newOrder);
 
+                //clear cart
+                _cartService.ClearCartProducts(cart);
+
                 return new OkObjectResult(new
                 {
                     status = "success",

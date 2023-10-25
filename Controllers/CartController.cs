@@ -239,7 +239,7 @@ namespace ToyEcommerceASPNET.Controllers
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                ;
+                
                 var cart = await _cartService.GetCartByUserId(userId);
 
                 var productId = request["productId"]?.ToString();
