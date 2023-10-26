@@ -55,6 +55,10 @@ public class ProductService : IProductService
         return categories;
     }
 
+    //Add new category to products
+
+
+
     public async Task<Product> GetProductById(string id)
     {
         try
