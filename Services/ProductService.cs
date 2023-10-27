@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using ToyEcommerceASPNET.Dto;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Models.interfaces;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -39,6 +40,11 @@ public class ProductService : IProductService
         };
     }
 
+    public List<Product> GetAllProducts()
+    {
+        return _products.Find(product => true).ToList();
+    }
+
     // Get all categories from products
     public async Task<Object> GetAllCategoriesAsync()
     {
@@ -55,21 +61,26 @@ public class ProductService : IProductService
         return categories;
     }
 
-    public async Task<Product> GetProductById(string id)
-    {
-        try
-        {
-            var product = await _products.Find(product => product.Id == id).FirstOrDefaultAsync();
-            return product;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return null;
-        }
-    }
+    //public async Task<Product> GetProductById(string id)
+    //{
+    //    try
+    //    {
+    //        var product = await _products.Find(product => product.Id == id).FirstOrDefaultAsync();
+    //        return product;
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        Console.WriteLine(e.Message);
+    //        return null;
+    //    }
+    //}
 
-    public async Task<Object> GetProductsByCategory(string category, int page = 1)
+	public Product GetProductById(string id)
+	{
+		return _products.Find(product => product.Id == id).FirstOrDefault();
+	}
+
+	public async Task<Object> GetProductsByCategory(string category, int page = 1)
     {
         List<Product> products;
         if (category is "All" or null)
@@ -122,13 +133,40 @@ public class ProductService : IProductService
         await _products.InsertOneAsync(product);
     }
 
-    public async Task UpdateProductAsync(string id, Product product)
-    {
-        await _products.ReplaceOneAsync(p => p.Id == id, product);
-    }
+	public Product CreateProduct(Product product)
+	{
+		_products.InsertOne(product);
+		return product;
+	}
 
-    public async Task DeleteProductAsync(string id)
-    {
-        await _products.DeleteOneAsync(product => product.Id == id);
-    }
+	//public async Task UpdateProductAsync(string id, Product product)
+ //   {
+ //       await _products.ReplaceOneAsync(p => p.Id == id, product);
+ //   }
+	public Product UpdateProduct(string id, Product updatedProduct)
+	{
+		_products.ReplaceOne(product => product.Id == id, updatedProduct);
+		return updatedProduct;
+	}
+
+	//public async Task DeleteProductAsync(string id)
+ //   {
+ //       await _products.DeleteOneAsync(product => product.Id == id);
+ //   }
+
+	public void DeleteProduct(string id)
+	{
+		var deletedProduct = _products.DeleteOne(product => product.Id == id);
+	}
+
+	public async Task<long> CountProductsAsync()
+	{
+		return await _products.CountDocumentsAsync(user => true);
+	}
+
+    public Product GetProductTrimToUpper(ProductDto productCreate)
+	{
+		return GetAllProducts().Where(c => c.Name.Trim().ToUpper() == productCreate.Name.TrimEnd().ToUpper())
+			.FirstOrDefault();
+	}
 }

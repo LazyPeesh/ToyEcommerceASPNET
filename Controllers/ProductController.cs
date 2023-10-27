@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
+using AutoMapper;
+using System.Collections.Generic;
+using ToyEcommerceASPNET.Services;
 
 namespace ToyEcommerceASPNET.Controllers
 {
@@ -11,21 +14,48 @@ namespace ToyEcommerceASPNET.Controllers
 	{
 		private readonly IProductService _productService;
 		private readonly IWebHostEnvironment _environment;
+		private readonly IMapper _mapper;
 
-		public ProductController(IProductService productService, IWebHostEnvironment environment)
+		public ProductController(IProductService productService, IWebHostEnvironment environment, IMapper mapper)
 		{
 			_productService = productService;
 			_environment = environment;
+			_mapper = mapper;
 		}
 
 		// GET: api/v1/products
 		[HttpGet("products")]
-		public async Task<IActionResult> GetAllProducts([FromQuery(Name = "page")] int page)
+		public async Task<IActionResult> GetProducts([FromQuery(Name = "page")] int page = 1)
 		{
 			try
 			{
-				var products = await _productService.GetAllProductsAsync(page);
-				return Ok(products);
+				var products = _mapper.Map<List<Product>>(_productService.GetAllProducts());
+
+				// Adjust page size as needed
+				int pageSize = 10;
+
+				// Count total users
+				long totalProducts = await _productService.CountProductsAsync();
+
+				// Calculate total pages
+				int totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+
+				if (page < 1 || page > totalPages)
+				{
+					return new OkObjectResult(new
+					{
+						status = "error",
+						Message = "Invalid page"
+					});
+				}
+
+				return new OkObjectResult(new
+				{
+					status = "success",
+					products,
+					totalPage = totalPages,
+					totalLength = totalProducts
+				});
 			}
 			catch (Exception ex)
 			{
@@ -43,7 +73,9 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-				var product = await _productService.GetProductById(id);
+
+				//var product = _productService.GetProductById(id);
+				var product = _mapper.Map<Product>(_productService.GetProductById(id));
 
 				if (product == null)
 				{
@@ -53,7 +85,6 @@ namespace ToyEcommerceASPNET.Controllers
 						message = $"Product with Id = {id} not found"
 					});
 				}
-
 
 				return new OkObjectResult(new
 				{
@@ -162,7 +193,9 @@ namespace ToyEcommerceASPNET.Controllers
 					Category = product.Category
 				};
 
-				await _productService.CreateProductAsync(newProduct);
+
+				var productMap = _mapper.Map<Product>(_productService.CreateProduct(newProduct));
+				//_productService.CreateProduct(newProduct);
 
 
 				// Update images file path for Product
@@ -170,7 +203,7 @@ namespace ToyEcommerceASPNET.Controllers
 				{
 					List<string> images = await UploadImages(uploadImages, newProduct.Id);
 					newProduct.Images = images; // Add images path
-					await _productService.UpdateProductAsync(newProduct.Id, newProduct);
+					_productService.UpdateProduct(newProduct.Id, newProduct);
 				}
 
 
@@ -199,7 +232,9 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-				var existingProduct = await _productService.GetProductById(id);
+				//var existingProduct = _productService.GetProductById(id);
+				var existingProduct = _mapper.Map<Product>(_productService.GetProductById(id));
+
 
 				if (existingProduct == null)
 					return new BadRequestObjectResult(new
@@ -261,7 +296,8 @@ namespace ToyEcommerceASPNET.Controllers
 					updateProduct.Images = product.KeptImages;
 				}
 
-				await _productService.UpdateProductAsync(id, updateProduct);
+				var productMap = _mapper.Map<Product>(_productService.UpdateProduct(id, updateProduct));
+				//_productService.UpdateProduct(id, updateProduct);
 
 
 				return new OkObjectResult(new
@@ -288,7 +324,8 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-				var existingProduct = await _productService.GetProductById(id);
+				//var existingProduct = _productService.GetProductById(id);
+				var existingProduct = _mapper.Map<Product>(_productService.GetProductById(id));
 
 				if (existingProduct == null)
 					return new BadRequestObjectResult(new
@@ -300,7 +337,8 @@ namespace ToyEcommerceASPNET.Controllers
 
 				await RemoveImages(existingProduct.Images);
 
-				await _productService.DeleteProductAsync(id);
+				_productService.DeleteProduct(id);
+
 				return new OkObjectResult(new
 				{
 					status = "success",

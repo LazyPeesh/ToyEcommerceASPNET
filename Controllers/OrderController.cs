@@ -266,7 +266,7 @@ namespace ToyEcommerceASPNET.Controllers
 
                 foreach (var orderItem in order.Products)
                 {
-                    var currentProduct = await _productService.GetProductById(orderItem.ProductId);
+                    var currentProduct = _productService.GetProductById(orderItem.ProductId);
 
                     if (currentProduct == null)
                     {
@@ -282,7 +282,7 @@ namespace ToyEcommerceASPNET.Controllers
 
                     // Update product quantity
                     currentProduct.Quantity -= orderItem.Quantity;
-                    await _productService.UpdateProductAsync(currentProduct.Id, currentProduct);
+                    _productService.UpdateProduct(currentProduct.Id, currentProduct);
                 }
 
                 await _transactionService.ChangeTransactionStatusAsync(id, order.Status);

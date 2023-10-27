@@ -23,8 +23,9 @@ namespace ToyEcommerceASPNET
             // Add services to the container.
             builder.Services.Configure<DatabaseSettings>(
                 builder.Configuration.GetSection(nameof(DatabaseSettings)));
+			builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            builder.Services.AddTransient<IProductService, ProductService>();
+			builder.Services.AddTransient<IProductService, ProductService>();
             builder.Services.AddTransient<IUserService, UserService>();
 
             builder.Services.AddTransient<ICartService, CartService>();
