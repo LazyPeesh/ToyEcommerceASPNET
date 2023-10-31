@@ -29,7 +29,8 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-				var products = _mapper.Map<List<Product>>(_productService.GetAllProducts());
+				//var products = _mapper.Map<List<Product>>(_productService.GetAllProducts());
+				var products = _productService.GetAllProducts();
 
 				// Adjust page size as needed
 				int pageSize = 10;
@@ -42,7 +43,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 				if (page < 1 || page > totalPages)
 				{
-					return new OkObjectResult(new
+					return new BadRequestObjectResult(new
 					{
 						status = "error",
 						Message = "Invalid page"
@@ -73,13 +74,12 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-
-				//var product = _productService.GetProductById(id);
-				var product = _mapper.Map<Product>(_productService.GetProductById(id));
+				var product = _productService.GetProductById(id);
+				//var product = _mapper.Map<Product>(_productService.GetProductById(id));
 
 				if (product == null)
 				{
-					return new OkObjectResult(new
+					return new BadRequestObjectResult(new
 					{
 						status = "error",
 						message = $"Product with Id = {id} not found"
@@ -94,7 +94,7 @@ namespace ToyEcommerceASPNET.Controllers
 			}
 			catch (Exception ex)
 			{
-				return new OkObjectResult(new
+				return new BadRequestObjectResult(new
 				{
 					status = "error",
 					message = ex.Message
@@ -123,7 +123,7 @@ namespace ToyEcommerceASPNET.Controllers
 			}
 			catch (Exception ex)
 			{
-				return new OkObjectResult(new
+				return new BadRequestObjectResult(new
 				{
 					status = "error",
 					message = ex.Message
@@ -194,8 +194,8 @@ namespace ToyEcommerceASPNET.Controllers
 				};
 
 
-				var productMap = _mapper.Map<Product>(_productService.CreateProduct(newProduct));
-				//_productService.CreateProduct(newProduct);
+				//var productMap = _mapper.Map<Product>(_productService.CreateProduct(newProduct));
+				var createdProduct = _productService.CreateProduct(newProduct);
 
 
 				// Update images file path for Product
@@ -211,7 +211,7 @@ namespace ToyEcommerceASPNET.Controllers
 				{
 					status = "success",
 					message = "Product created successfully",
-					newProduct
+					createdProduct
 				});
 			}
 			catch (Exception ex)
@@ -232,8 +232,8 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-				//var existingProduct = _productService.GetProductById(id);
-				var existingProduct = _mapper.Map<Product>(_productService.GetProductById(id));
+				//var existingProduct = _mapper.Map<Product>(_productService.GetProductById(id));
+				var existingProduct = _productService.GetProductById(id);
 
 
 				if (existingProduct == null)
@@ -296,9 +296,8 @@ namespace ToyEcommerceASPNET.Controllers
 					updateProduct.Images = product.KeptImages;
 				}
 
-				var productMap = _mapper.Map<Product>(_productService.UpdateProduct(id, updateProduct));
-				//_productService.UpdateProduct(id, updateProduct);
-
+				//var productMap = _mapper.Map<Product>(_productService.UpdateProduct(id, updateProduct));
+				_productService.UpdateProduct(id, updateProduct);
 
 				return new OkObjectResult(new
 				{
@@ -324,8 +323,8 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-				//var existingProduct = _productService.GetProductById(id);
-				var existingProduct = _mapper.Map<Product>(_productService.GetProductById(id));
+				var existingProduct = _productService.GetProductById(id);
+				//var existingProduct = _mapper.Map<Product>(_productService.GetProductById(id));
 
 				if (existingProduct == null)
 					return new BadRequestObjectResult(new

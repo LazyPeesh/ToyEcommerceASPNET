@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToyEcommerceASPNET", "ToyEcommerceASPNET.csproj", "{EF742902-BFDA-4F35-9624-EAFF7E72AF2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToyEcommerceASPNET.test", "..\ToyEcommerceASPNET.test\ToyEcommerceASPNET.test.csproj", "{4396161B-3EC7-488A-A019-496253B2BCC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToyEcommerceASPNET.unitTest", "..\ToyEcommerceASPNET.unitTest\ToyEcommerceASPNET.unitTest.csproj", "{5AD447EE-E002-4E85-A355-94E9C7F5D73C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{EF742902-BFDA-4F35-9624-EAFF7E72AF2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF742902-BFDA-4F35-9624-EAFF7E72AF2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF742902-BFDA-4F35-9624-EAFF7E72AF2F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4396161B-3EC7-488A-A019-496253B2BCC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4396161B-3EC7-488A-A019-496253B2BCC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4396161B-3EC7-488A-A019-496253B2BCC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4396161B-3EC7-488A-A019-496253B2BCC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AD447EE-E002-4E85-A355-94E9C7F5D73C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AD447EE-E002-4E85-A355-94E9C7F5D73C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AD447EE-E002-4E85-A355-94E9C7F5D73C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AD447EE-E002-4E85-A355-94E9C7F5D73C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

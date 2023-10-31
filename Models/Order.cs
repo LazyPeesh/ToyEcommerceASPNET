@@ -6,7 +6,6 @@ namespace ToyEcommerceASPNET.Models
 {
 	public class Order
 	{
-
 		[BsonId]
 		[BsonRepresentation(BsonType.ObjectId)]
 		public string? Id { get; set; }
@@ -28,6 +27,5 @@ namespace ToyEcommerceASPNET.Models
 		public string? Phone { get; set; }
 
 		public DateTime CreatedAt { get; set; } = DateTime.Now;
-
 	}
 }

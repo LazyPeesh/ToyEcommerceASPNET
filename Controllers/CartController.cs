@@ -2,6 +2,7 @@
 using System.Text.Json.Nodes;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
@@ -10,6 +11,7 @@ using ToyEcommerceASPNET.Services.interfaces;
 
 namespace ToyEcommerceASPNET.Controllers
 {
+
 	[Route("api/v1")]
 	[ApiController]
 	public class CartController : ControllerBase
@@ -43,7 +45,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 				if (page < 1 || page > totalPages)
 				{
-					return new OkObjectResult(new
+					return new BadRequestObjectResult(new
 					{
 						Status = "error",
 						Message = "Invalid page number"
@@ -51,8 +53,8 @@ namespace ToyEcommerceASPNET.Controllers
 				}
 
 				// Get users for the specified page
-				//var carts = _cartService.GetCarts(page, pageSize);
-				var carts = _mapper.Map<List<Cart>>(_cartService.GetCarts(page, pageSize));
+				//var carts = _mapper.Map<List<Cart>>(_cartService.GetCarts(page, pageSize));
+				var carts = _cartService.GetCarts(page, pageSize);
 
 				if (carts == null)
 				{
@@ -75,7 +77,7 @@ namespace ToyEcommerceASPNET.Controllers
 			}
 			catch (Exception e)
 			{
-				return new OkObjectResult(new
+				return new BadRequestObjectResult(new
 				{
 					Status = "error",
 					Message = e.Message
@@ -93,23 +95,21 @@ namespace ToyEcommerceASPNET.Controllers
 				// Get the user id from the access_token
 				var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-				//var cart = _cartService.GetCartByUserId(userId).Result;
-				var cart = _mapper.Map<Cart>(_cartService.GetCartByUserId(userId).Result);
+				//var cart = _mapper.Map<Cart>(_cartService.GetCartByUserId(userId).Result);
+				var cart = _cartService.GetCartByUserId(userId);
 
 				if (cart == null)
 				{
-
-
-					//_cartService.CreateCart(new Cart()
-					//               {
-					//                   UserId = userId,
-					//                   Products = new List<CartItem> { }
-					//               });
-					var cartMap = _mapper.Map<Cart>(_cartService.CreateCart(new Cart()
+					var newCart = _cartService.CreateCart(new Cart()
 					{
 						UserId = userId,
 						Products = new List<CartItem> { }
-					}));
+					});
+					//var cartMap = _mapper.Map<Cart>(_cartService.CreateCart(new Cart()
+					//{
+					//	UserId = userId,
+					//	Products = new List<CartItem> { }
+					//}));
 
 
 					return new OkObjectResult(new
@@ -131,7 +131,7 @@ namespace ToyEcommerceASPNET.Controllers
 			}
 			catch (Exception e)
 			{
-				return new OkObjectResult(new
+				return new BadRequestObjectResult(new
 				{
 					Status = "error",
 					Message = e.Message
@@ -152,13 +152,13 @@ namespace ToyEcommerceASPNET.Controllers
 					Products = new List<CartItem> { }
 				};
 
-				//_cartService.CreateCart(cartCreate);
-				var cartMap = _mapper.Map<Cart>(_cartService.CreateCart(cartCreate));
+				var newCart = _cartService.CreateCart(cartCreate);
+				//var cartMap = _mapper.Map<Cart>(_cartService.CreateCart(cartCreate));
 
 				return new OkObjectResult(new
 				{
 					status = "success",
-					cart = cartCreate
+					cart = newCart
 				});
 			}
 			catch (Exception e)
@@ -189,8 +189,8 @@ namespace ToyEcommerceASPNET.Controllers
 				var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
 				var cartResult = await _cartService.GetCartByUserId(userId);
-				var productId = request["productId"].ToString();
-				var quantity = int.Parse(request["quantity"].ToString());
+				var productId = request["productId"]?.ToString();
+				var quantity = int.Parse(request["quantity"]?.ToString() ?? "1");
 
 				// if user doesn't have a cart, create a new one
 				if (cartResult == null)
@@ -236,7 +236,7 @@ namespace ToyEcommerceASPNET.Controllers
 			}
 			catch (Exception e)
 			{
-				return new OkObjectResult(new
+				return new BadRequestObjectResult(new
 				{
 					Status = "error",
 					Message = e.Message
@@ -253,9 +253,9 @@ namespace ToyEcommerceASPNET.Controllers
 			try
 			{
 				var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-				;
-				//var cart = await _cartService.GetCartByUserId(userId);
-				var cart = _mapper.Map<Cart>(_cartService.GetCartByUserId(userId).Result);
+
+				var cart = await _cartService.GetCartByUserId(userId);
+				//var cart = _mapper.Map<Cart>(_cartService.GetCartByUserId(userId).Result);
 
 
 				var productId = request["productId"]?.ToString();
@@ -300,7 +300,7 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 				var cart = _cartService.GetCartByUserId(userId).Result;
-				var productId = request["productId"].ToString();
+				var productId = request["productId"]?.ToString();
 
 				if (cart == null)
 				{
@@ -342,8 +342,8 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
-				//var cart = _cartService.GetCartById(id);
-				var cart = _mapper.Map<Cart>(_cartService.GetCartById(id));
+				var cart = _cartService.GetCartById(id);
+				//var cart = _mapper.Map<Cart>(_cartService.GetCartById(id));
 
 				if (cart == null)
 				{
