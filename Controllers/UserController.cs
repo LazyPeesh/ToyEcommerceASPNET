@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.Text.Json.Nodes;
@@ -139,6 +140,8 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// PUT api/<UserController>/5
 		[HttpPut("user/{id}")]
+		[Authorize("IsAdminorModuser")]
+
 		public async Task<IActionResult> Put([FromRoute] string id, [FromBody] JsonObject request)
 		{
 			try
@@ -155,11 +158,11 @@ namespace ToyEcommerceASPNET.Controllers
 
 				var fullName = request["fullName"].ToString();
 				var email = request["email"].ToString();
-				var isAdmin = ((bool)request["isAdmin"]);
+				var isAdmin = request["isAdmin"].ToString();
 
 				existingUser.Email = email;
 				existingUser.FullName = fullName;
-				existingUser.IsAdmin = isAdmin;
+				existingUser.Role = isAdmin;
 
 
 				_userService.UpdateUser(id, existingUser);
@@ -183,6 +186,8 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// DELETE api/<UserController>/5
 		[HttpDelete("user/{id}")]
+		[Authorize("IsAdminorModuser")]
+
 		public async Task<IActionResult> Delete([FromRoute] string id)
 		{
 			try

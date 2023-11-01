@@ -79,7 +79,41 @@ namespace ToyEcommerceASPNET
 
                     return role == "Admin" || userIdClaim == userIdFromRoute;
                 }));
-            });
+                options.AddPolicy("IsAdminorModProduct" , policy => policy.RequireAssertion(context =>
+				{
+					var userIdClaim = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+					var userIdFromRoute = context.Resource as string;
+					var role = context.User.FindFirstValue(ClaimTypes.Role);
+
+					return role == "ModProduct" || userIdClaim == userIdFromRoute;
+				}));
+
+
+
+                options.AddPolicy("IsAdminorModUser", policy => policy.RequireAssertion(context =>
+                {
+					var userIdClaim = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+					var userIdFromRoute = context.Resource as string;
+					var role = context.User.FindFirstValue(ClaimTypes.Role);
+					return role == "ModUser" || userIdClaim == userIdFromRoute;
+				}));
+
+                options.AddPolicy("IsAdminorModOrder", policy => policy.RequireAssertion(context =>
+                {
+					var userIdClaim = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+					var userIdFromRoute = context.Resource as string;
+					var role = context.User.FindFirstValue(ClaimTypes.Role);
+					return role == "ModOrder" || userIdClaim == userIdFromRoute;
+				}));
+
+
+
+				options.AddPolicy("IsModProduct", policy => policy.RequireClaim(ClaimTypes.Role, "ModProduct"));
+				options.AddPolicy("IsModUser", policy => policy.RequireClaim(ClaimTypes.Role, "ModUser"));
+				options.AddPolicy("IsModOrder", policy => policy.RequireClaim(ClaimTypes.Role, "ModOrder"));
+
+
+			});
 
             // Create swagger document for APIs
             builder.Services.AddSwaggerGen(c =>

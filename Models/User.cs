@@ -15,7 +15,6 @@ namespace ToyEcommerceASPNET.Models
 		[RegularExpression(@"^[a-zA-Z ]+$", ErrorMessage = "Please provide a valid full name")]
 		public string? FullName { get; set; }
 
-/*		[BsonUnique(ErrorMessage = "Email already exists")] */
 		[Required(ErrorMessage = "Email is required")]
 		[StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
 		[RegularExpression(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", ErrorMessage = "Please provide a valid email")]
@@ -28,7 +27,7 @@ namespace ToyEcommerceASPNET.Models
 
 		public string? ImageUrl { get; set; } = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwbGozsS9QP10p16rZiCrQD0koXVkI4c7LwUHab9dkmFRcN0VqCkB37f2y0EnySItwykg&usqp=CAU";
 
-		public bool? IsAdmin { get; set; } = false;
+		public string? Role { get; set; } = "user";
 
 		[BsonIgnore]
 		public Cart? Cart { get; set; } = new Cart();

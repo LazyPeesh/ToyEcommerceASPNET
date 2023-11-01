@@ -29,8 +29,9 @@ namespace ToyEcommerceASPNET.Controllers
 
         // GET: api/<OrderController>
         [HttpGet("orders")]
-        [Authorize]
-        public async Task<IActionResult> GetAllOrders([FromQuery] int page = 1)
+		[Authorize]
+
+		public async Task<IActionResult> GetAllOrders([FromQuery] int page = 1)
         {
             try
             {
@@ -56,7 +57,7 @@ namespace ToyEcommerceASPNET.Controllers
 
                 // Get users for the specified page
                 var orders = new List<Order>();
-                if (role == "Admin")
+                if (role == "Admin" || role == "ModOrder" )
                 {
                     orders = await _orderService.GetOrders(page, pageSize);
                 }
@@ -240,6 +241,7 @@ namespace ToyEcommerceASPNET.Controllers
 
         // PUT api/<OrderController>/5
         [HttpPut("order/{id}")]
+        [Authorize("IsAdminOrModOrder")]
         public async Task<IActionResult> ConfirmOrder([FromRoute] string id)
         {
             try

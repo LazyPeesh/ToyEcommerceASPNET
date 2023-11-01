@@ -147,7 +147,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// POST api/v1/product
 		[HttpPost("product")]
-		[Authorize("IsAdmin")]
+		[Authorize("IsAdminorModProduct")]
 		public async Task<IActionResult> CreateProduct([FromForm] Product product, IFormFileCollection uploadImages)
 		{
 			try
@@ -159,7 +159,8 @@ namespace ToyEcommerceASPNET.Controllers
 					Price = product.Price,
 					Description = product.Description,
 					Ratings = product.Ratings,
-					Category = product.Category
+					Category = product.Category,
+					Quantity = product.Quantity,
 				};
 
 				await _productService.CreateProductAsync(newProduct);
@@ -193,7 +194,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// PUT api/v1/product/{id}
 		[HttpPut("product/{id}")]
-		[Authorize("IsAdmin")]
+		[Authorize("IsAdminorModProduct")]
 		public async Task<IActionResult> UpdateProduct([FromRoute] string id,
 			[FromForm] UpdateProductResponse product, IFormFileCollection uploadImages)
 		{
@@ -283,7 +284,7 @@ namespace ToyEcommerceASPNET.Controllers
 
 		// DELETE api/v1/products/{id}
 		[HttpDelete("product/{id}")]
-		[Authorize("IsAdmin")]
+		[Authorize("IsAdminorModProduct")]
 		public async Task<IActionResult> DeleteProduct([FromRoute] string id)
 		{
 			try
