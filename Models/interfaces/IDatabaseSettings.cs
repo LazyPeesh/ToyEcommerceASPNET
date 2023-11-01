@@ -8,4 +8,6 @@ public interface IDatabaseSettings
     string ProductCollectionName { get; set; }
     string UserCollectionName { get; set; }
     string OrderCollectionName { get; set; }
+    string CategoryCollectionName { get; set; }
+
 }

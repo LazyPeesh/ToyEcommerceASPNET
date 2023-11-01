@@ -10,6 +10,7 @@ namespace ToyEcommerceASPNET.Services;
 public class ProductService : IProductService
 {
     private readonly IMongoCollection<Product> _products;
+    private readonly IMongoCollection<Category> _category;
 
     public ProductService(IOptions<DatabaseSettings> databaseSettings)
     {
@@ -20,6 +21,11 @@ public class ProductService : IProductService
 
         _products = mongoDatabase.GetCollection<Product>(
             databaseSettings.Value.ProductCollectionName);
+
+        _category = mongoDatabase.GetCollection<Category>(
+            databaseSettings.Value.CategoryCollectionName);
+
+
     }
 
     public async Task<Object> GetAllProductsAsync(int? queryPage)
@@ -76,7 +82,7 @@ public class ProductService : IProductService
     public async Task<Object> GetProductsByCategory(string category, int page = 1)
     {
         List<Product> products;
-        if (category is "All" or null)
+        if (category == null)
         {
             // Crate aggregation for paginating the products
             products = await _products.Find(product => true).ToListAsync();
@@ -120,6 +126,12 @@ public class ProductService : IProductService
             totalLength = total
         };
     }
+
+    // Create new category
+public async Task CreateCategoryAsync(Category category)
+    {
+		await _category.InsertOneAsync(category);
+	}
 
     public async Task CreateProductAsync(Product product)
     {

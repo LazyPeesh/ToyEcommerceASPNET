@@ -32,7 +32,8 @@ namespace ToyEcommerceASPNET
             builder.Services.AddTransient<IOrderService, OrderService>();
             builder.Services.AddTransient<ITransactionService, TransactionService>();
 
-            builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+
+			builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 
             builder.Services.AddMvc();
             builder.Services.AddControllers();
@@ -85,7 +86,7 @@ namespace ToyEcommerceASPNET
 					var userIdFromRoute = context.Resource as string;
 					var role = context.User.FindFirstValue(ClaimTypes.Role);
 
-					return role == "ModProduct" || userIdClaim == userIdFromRoute;
+					return role == "Admin" || userIdClaim == userIdFromRoute;
 				}));
 
 

@@ -24,7 +24,8 @@ namespace ToyEcommerceASPNET.Models
 		public double? Ratings { get; set; } = null;
 
 		[EnumDataType(typeof(ProductCategory))]
-		public string? Category { get; set; }
+		//public string? Category { get; set; }
+		public Category Category { get; set; }
 
 		public List<string> KeptImages { get; set; } = new List<string> { };
 	}

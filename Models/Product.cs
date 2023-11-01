@@ -32,5 +32,7 @@ namespace ToyEcommerceASPNET.Models
 		[Required(ErrorMessage = "Product category is required")]
 		[EnumDataType(typeof(ProductCategory))]
 		public string Category { get; set; }
+
+		//public string? Category { get; set; }
 	}
 }

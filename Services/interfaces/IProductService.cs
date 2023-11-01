@@ -13,5 +13,7 @@ namespace ToyEcommerceASPNET.Services.interfaces
         Task CreateProductAsync(Product product);
         Task UpdateProductAsync(string id, Product product);
         Task DeleteProductAsync(string id);
-    }
+        Task CreateCategoryAsync(Category category);
+
+	}
 }

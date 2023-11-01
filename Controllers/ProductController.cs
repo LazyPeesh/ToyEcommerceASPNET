@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Services.interfaces;
 
@@ -10,12 +11,14 @@ namespace ToyEcommerceASPNET.Controllers
 	public class ProductController : ControllerBase
 	{
 		private readonly IProductService _productService;
+		private readonly IProductService _categoryService;
 		private readonly IWebHostEnvironment _environment;
 
-		public ProductController(IProductService productService, IWebHostEnvironment environment)
+		public ProductController(IProductService productService, IWebHostEnvironment environment, IProductService categoryService)
 		{
 			_productService = productService;
 			_environment = environment;
+			_categoryService = categoryService;
 		}
 
 		// GET: api/v1/products
@@ -70,6 +73,8 @@ namespace ToyEcommerceASPNET.Controllers
 				});
 			}
 		}
+
+		//create category
 
 		// GET api/v1/products/search?keyword={keyword}&page={page}
 		[HttpGet("products/search")]
@@ -133,7 +138,9 @@ namespace ToyEcommerceASPNET.Controllers
 			{
 				var products = await _productService.GetProductsByCategory(category, page);
 
-				return Ok(products);
+				return new OkObjectResult(new { 
+					status = "success",
+					products });
 			}
 			catch (Exception ex)
 			{
@@ -145,9 +152,37 @@ namespace ToyEcommerceASPNET.Controllers
 			}
 		}
 
+		//create category
+		[HttpPost("category")]
+		public async Task<IActionResult> CreateCategory([FromBody] JsonObject request)
+		{
+			try
+			{
+				var category = request["category"].ToString();
+				var newCategory = new Category
+				{
+					Name = category
+				};
+				await _categoryService.CreateCategoryAsync(newCategory);
+				return new OkObjectResult(new
+				{
+					status = "success",
+					message = "Category created successfully",
+					newCategory
+				});
+			}
+			catch (Exception ex)
+			{
+				return new BadRequestObjectResult(new
+				{
+					status = "error",
+					message = ex.Message
+				});
+			}
+		}
+
 		// POST api/v1/product
 		[HttpPost("product")]
-		[Authorize("IsAdminorModProduct")]
 		public async Task<IActionResult> CreateProduct([FromForm] Product product, IFormFileCollection uploadImages)
 		{
 			try
