@@ -154,21 +154,62 @@ namespace ToyEcommerceASPNET.Controllers
 
 		//create category
 		[HttpPost("category")]
-		public async Task<IActionResult> CreateCategory([FromBody] JsonObject request)
+		public async Task<IActionResult> CreateCategory([FromBody] Category category)
 		{
 			try
 			{
-				var category = request["category"].ToString();
-				var newCategory = new Category
-				{
-					Name = category
-				};
-				await _categoryService.CreateCategoryAsync(newCategory);
+				await _categoryService.CreateCategoryAsync(category);
 				return new OkObjectResult(new
 				{
 					status = "success",
 					message = "Category created successfully",
-					newCategory
+					category
+				});
+			}
+			catch (Exception ex)
+			{
+				return new BadRequestObjectResult(new
+				{
+					status = "error",
+					message = ex.Message
+				});
+			}
+		}
+
+		//get all categories
+		[HttpGet("getAllcategory")]
+		public async Task<IActionResult> GetAllCategories()
+		{
+			try
+			{
+				var categories = await _categoryService.GetCategoriesAsync();
+				return new OkObjectResult(new
+				{
+					status = "success",
+					categories
+				});
+			}
+			catch (Exception ex)
+			{
+				return new BadRequestObjectResult(new
+				{
+					status = "error",
+					message = ex.Message
+				});
+			}
+		}
+
+		//delete category
+		[HttpDelete("category/{id}")]
+		public async Task<IActionResult> DeleteCategory([FromRoute] string id)
+		{
+			try
+			{
+				await _categoryService.DeleteCategoryAsync(id);
+				return new OkObjectResult(new
+				{
+					status = "success",
+					message = "Category deleted successfully"
 				});
 			}
 			catch (Exception ex)

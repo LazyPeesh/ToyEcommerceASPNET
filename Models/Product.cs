@@ -30,7 +30,7 @@ namespace ToyEcommerceASPNET.Models
 		public List<string> Images { get; set; } = new List<string> { };
 
 		[Required(ErrorMessage = "Product category is required")]
-		[EnumDataType(typeof(ProductCategory))]
+		//[EnumDataType(typeof(ProductCategory))]
 		public string Category { get; set; }
 
 		//public string? Category { get; set; }

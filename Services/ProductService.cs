@@ -10,9 +10,11 @@ namespace ToyEcommerceASPNET.Services;
 public class ProductService : IProductService
 {
     private readonly IMongoCollection<Product> _products;
-    private readonly IMongoCollection<Category> _category;
+	private readonly IMongoCollection<Category> _category;
 
-    public ProductService(IOptions<DatabaseSettings> databaseSettings)
+
+
+	public ProductService(IOptions<DatabaseSettings> databaseSettings)
     {
         var mongoClient = new MongoClient(databaseSettings.Value.ConnectionString);
 
@@ -24,8 +26,6 @@ public class ProductService : IProductService
 
         _category = mongoDatabase.GetCollection<Category>(
             databaseSettings.Value.CategoryCollectionName);
-
-
     }
 
     public async Task<Object> GetAllProductsAsync(int? queryPage)
@@ -61,8 +61,25 @@ public class ProductService : IProductService
         return categories;
     }
 
-    //Add new category to products
+    //create new category
+    public async Task CreateCategoryAsync(Category category)
+    {
+		await _category.InsertOneAsync(category);
+	}
 
+
+    //get all categories in dtb 
+    public async Task<List<Category>> GetCategoriesAsync()
+    {
+		var categories = await _category.Find(category => true).ToListAsync();
+		return categories;
+	}
+
+    //delete category
+    public async Task DeleteCategoryAsync(string id)
+    {
+        await _category.DeleteOneAsync(category => category.Id == id);
+    }
 
 
     public async Task<Product> GetProductById(string id)

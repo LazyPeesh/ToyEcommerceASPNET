@@ -9,5 +9,4 @@ public interface IDatabaseSettings
     string UserCollectionName { get; set; }
     string OrderCollectionName { get; set; }
     string CategoryCollectionName { get; set; }
-
 }
