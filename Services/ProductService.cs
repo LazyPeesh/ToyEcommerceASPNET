@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using ToyEcommerceASPNET.Models;
 using ToyEcommerceASPNET.Models.interfaces;
@@ -161,4 +162,12 @@ public class ProductService : IProductService
     {
         await _products.DeleteOneAsync(product => product.Id == id);
     }
+
+	public async Task<bool> CategoryExists(string categoryName)
+	{
+		var filter = Builders<Category>.Filter.Eq("Name", categoryName);
+		var category = await _category.Find(filter).FirstOrDefaultAsync();
+
+		return category != null;
+	}
 }

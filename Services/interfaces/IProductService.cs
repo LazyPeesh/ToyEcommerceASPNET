@@ -17,6 +17,8 @@ namespace ToyEcommerceASPNET.Services.interfaces
         Task DeleteCategoryAsync(string id);
         Task<List<Category>> GetCategoriesAsync();
 
+        Task<bool> CategoryExists(string categoryName);
+
 
 	}
 }

@@ -246,6 +246,19 @@ namespace ToyEcommerceASPNET.Controllers
 					});
 				}
 
+				//check product category is the same as category in database
+				bool categoryExists = await _productService.CategoryExists(product.Category);
+				if (!categoryExists)
+				{
+					ModelState.AddModelError("Category", "Category does not exist");
+					return new BadRequestObjectResult(new
+					{
+						status = "error",
+						message = "Category does not exist"
+					});
+				}
+
+
 				// Create a new Product model base on ProductImage model
 				var newProduct = new Product
 				{
