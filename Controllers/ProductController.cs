@@ -158,6 +158,14 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
+				if (!ModelState.IsValid)
+				{
+					return new BadRequestObjectResult(new
+					{
+						status = "error",
+						message = ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage))
+					});
+				}
 				await _categoryService.CreateCategoryAsync(category);
 				return new OkObjectResult(new
 				{
