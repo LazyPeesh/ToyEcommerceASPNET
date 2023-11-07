@@ -145,10 +145,7 @@ public class ProductService : IProductService
     }
 
     // Create new category
-public async Task CreateCategoryAsync(Category category)
-    {
-		await _category.InsertOneAsync(category);
-	}
+
 
     public async Task CreateProductAsync(Product product)
     {

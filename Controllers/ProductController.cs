@@ -228,6 +228,16 @@ namespace ToyEcommerceASPNET.Controllers
 		{
 			try
 			{
+
+				if (!ModelState.IsValid)
+				{
+					return  new BadRequestObjectResult(new
+					{
+						status = "error",
+						message = ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage))
+					});
+				}
+
 				// Create a new Product model base on ProductImage model
 				var newProduct = new Product
 				{
@@ -294,8 +304,8 @@ namespace ToyEcommerceASPNET.Controllers
 					Description = product.Description != null ? product.Description : existingProduct.Description,
 					Quantity = (int)(product.Quantity != null ? product.Quantity : existingProduct.Quantity),
 					Ratings = (double)(product.Ratings != null ? product.Ratings : existingProduct.Ratings),
-					Category = product.Category != null ? product.Category : existingProduct.Category,
-				};
+/*					Category = product.Category != null ? product.Category : existingProduct.Category,
+*/				};
 
 
 				// Add the images array to the product object
